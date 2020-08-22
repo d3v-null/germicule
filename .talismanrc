@@ -1,0 +1,14 @@
+fileignoreconfig:
+- filename: .env.local
+  checksum: 203ddbd66cdf5b1dff8d390b3892038c5b16fbe0ab8352cf31d0a3319f03e91e
+  ignore_detectors: []
+- filename: .env.production
+  checksum: e5861bbac3eb37c1435ad081ef1cc286b74a3fadcf425fbc1f7472e583844ffb
+  ignore_detectors: []
+- filename: internals/startingTemplate/src/react-app-env.d.ts
+  checksum: 92e821e6f844023387396dc59faa093c83a32266da95798a890096d0c97f573c
+  ignore_detectors: []
+- filename: src/react-app-env.d.ts
+  checksum: 8b94e5054df24bf4b30c7a02d1c15e40c80d107762f6938d54e683a703dea0e2
+  ignore_detectors: []
+scopeconfig: []
