@@ -5,34 +5,38 @@ export type GermiculeItem = {
   contact?: number;
   description?: string;
   cluster?: string;
-  germicule: Array<GermiculeItem>;
+  germicule: GermiculeItem[];
 } | null;
 
 export type GermiculeCluster = {
   name: string;
   location?: string;
+  members?: string[];
 };
 
 export type GermiculeMeta = {
   version?: string;
-  clusters?: Array<GermiculeCluster>;
-  germicules: Array<GermiculeItem>;
+  clusters?: GermiculeCluster[];
+  germicules: GermiculeItem[];
 };
 
 export type GraphNode = {
   name: string;
   _label?: string;
+  tooltip?: object;
+  _tooltip?: string;
   value?: number;
   symbolSize?: number;
-  tooltip?: string;
-  category?: string;
+  category?: number;
 };
 
 export type GraphEdge = {
   source: string;
   target: string;
-  value: number;
+  value?: number;
+  label?: object;
   _label?: string;
+  _tooltip?: string;
 };
 
 export type GraphCategory = {
@@ -40,7 +44,8 @@ export type GraphCategory = {
 };
 
 export type GraphInfo = {
-  nodes: Array<GraphNode>;
-  edges?: Array<GraphEdge>;
-  categories?: Array<GraphCategory>;
+  nodes: GraphNode[];
+  edges?: GraphEdge[];
+  partialEdges?: Partial<GraphEdge[]>;
+  categories?: GraphCategory[];
 };

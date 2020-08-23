@@ -11,12 +11,10 @@ import ReactEcharts from 'echarts-for-react';
 import {
   GermiculeItem,
   GermiculeMeta,
-  // GraphNode,
-  // GraphEdge,
-  // GraphCategory,
   GraphInfo,
   GraphNode,
   GraphCategory,
+  GraphEdge,
 } from '../../types';
 
 export type Props = {
@@ -28,41 +26,85 @@ function getNextUnknown() {
   return UNKNOWN_COUNT++;
 }
 
-const DEFAULT_NODE: GraphNode = {
-  name: '❓',
+const SYMBOL_SIZE = 30;
+
+const DEFAULT_NODE: Partial<GraphNode> = {
   _label: '❓',
-  symbolSize: 30,
+  symbolSize: SYMBOL_SIZE,
 };
 
 function toNode(item: GermiculeItem): GraphNode {
+  let partial: Partial<GraphNode> = {
+    ...DEFAULT_NODE,
+    _tooltip: JSON.stringify(item),
+  };
   if (item === null) {
     return {
-      ...DEFAULT_NODE,
+      ...partial,
       name: `unknown ${getNextUnknown()}`,
     };
   }
   const result: GraphNode = {
-    ...DEFAULT_NODE,
+    ...partial,
     name: item.name,
     _label: item.name,
   };
   if (item.risk) {
     result.value = item.risk;
+    result.category = Math.ceil(item.risk);
+    result.symbolSize = SYMBOL_SIZE * (1 + (5 - item.risk) / 5);
+  }
+  return result;
+}
+
+const DEFAULT_EDGE: Partial<GraphEdge> = {};
+
+function toPartialEdge(item: GermiculeItem): Partial<GraphEdge> {
+  let result: Partial<GraphEdge> = { ...DEFAULT_EDGE };
+  if (item && 'description' in item) {
+    result._label = item.description;
+    result._tooltip = item.description;
+  } else {
+    result.label = { show: false };
+  }
+  if (item && 'contact' in item) {
+    result.value = item.contact;
   }
   return result;
 }
 
 // TODO(dev): Rename to buildGraph
 // TODO(dev): Implement links
-export function deconstructGermicule(
-  germicules: Array<GermiculeItem>,
-): GraphInfo {
+export function deconstructGermicule(members: Array<GermiculeItem>): GraphInfo {
   const result: GraphInfo = {
     nodes: [],
+    edges: [],
+    partialEdges: [],
   };
-  germicules.forEach((item: GermiculeItem) => {
-    const node = toNode(item);
+  members.forEach((member: GermiculeItem) => {
+    const node: GraphNode = toNode(member);
     result.nodes.push(node);
+    const partialEdge = {
+      ...toPartialEdge(member),
+      target: node.name,
+    } as GraphEdge;
+
+    result.partialEdges!.push(partialEdge);
+    if (member && 'germicule' in member) {
+      const childGraph = deconstructGermicule(member!.germicule);
+      // console.log(`childGraph: ${JSON.stringify(childGraph)}`);
+      result.nodes.push(...childGraph.nodes);
+      result.edges!.push(...childGraph.edges!);
+      if ('partialEdges' in childGraph) {
+        childGraph.partialEdges!.forEach(partialChildEdge => {
+          result.edges!.push({
+            ...partialChildEdge,
+            source: node.name,
+          } as GraphEdge);
+        });
+      }
+      result.edges = result.edges!.concat(childGraph.edges!);
+    }
   });
   return result;
 }
@@ -75,7 +117,7 @@ export class GermiculeGraph extends React.Component<Props> {
     const graphInfo: GraphInfo = deconstructGermicule(
       this.props.data.germicules,
     );
-    console.log(`graphInfo ${JSON.stringify(graphInfo)}`);
+    console.log('graphInfo', graphInfo);
     const categoryNames =
       'categories' in graphInfo
         ? graphInfo.categories!.map((category: GraphCategory) => category.name)
@@ -84,28 +126,42 @@ export class GermiculeGraph extends React.Component<Props> {
       legend: {
         data: categoryNames,
       },
+      tooltip: {
+        show: true,
+        formatter: params => params.data._tooltip,
+        position: 'bottom',
+      },
       series: [
         {
           type: 'graph',
           layout: 'force',
-          animation: false,
+          animation: true,
+          categories: [
+            { name: '0', itemStyle: { color: '#859900' /* green */ } },
+            { name: '1', itemStyle: { color: '#2aa198' /* cyan */ } },
+            { name: '2', itemStyle: { color: '#268bd2' /* blue */ } },
+            { name: '3', itemStyle: { color: '#6c71c4' /* violet */ } },
+            { name: '4', itemStyle: { color: '#d33682' /* magenta */ } },
+            { name: '5', itemStyle: { color: '#dc322f' /* red */ } },
+          ],
           label: {
             show: true,
             position: 'inside',
             formatter: params => params.data._label,
           },
-          links: {
-            label: {
-              formatter: params => params.data._label,
-            },
+          edgeLabel: {
+            show: true,
+            position: 'middle',
+            formatter: params => params.data._label,
           },
+          roam: true,
           draggable: true,
           nodes: graphInfo.nodes,
-          categories: graphInfo.categories,
+          // categories: graphInfo.categories,
           force: {
-            edgeLength: 5,
-            repulsion: 20,
-            gravity: 0.2,
+            edgeLength: 100,
+            repulsion: 300,
+            // gravity: 0.2,
           },
           edges: graphInfo.edges,
         },
@@ -157,6 +213,7 @@ export class GermiculeGraph extends React.Component<Props> {
           theme={'theme_name'}
           onChartReady={this.onChartReadyCallback}
           // onEvents={EventsDict}
+          style={{ height: '100vh' }}
         />
       </Div>
     );
@@ -164,7 +221,7 @@ export class GermiculeGraph extends React.Component<Props> {
 }
 
 const Div = styled.div`
-  width: 'auto';
-  height: '50vh';
-  margin: 'auto';
+  width: auto;
+  height: 100vh;
+  margin: auto;
 `;

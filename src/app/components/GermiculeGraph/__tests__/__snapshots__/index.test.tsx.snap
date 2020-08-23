@@ -2,9 +2,9 @@
 
 exports[`<GermiculeGraph  /> should match snapshot 1`] = `
 .c0 {
-  width: 'auto';
-  height: '50vh';
-  margin: 'auto';
+  width: auto;
+  height: 100vh;
+  margin: auto;
 }
 
 <div
@@ -14,7 +14,7 @@ exports[`<GermiculeGraph  /> should match snapshot 1`] = `
   <div
     class="echarts-for-react "
     size-sensor-id="1"
-    style="height: 300px;"
+    style="height: 100vh;"
   >
     <object
       class="size-sensor-object"

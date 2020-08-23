@@ -46,14 +46,14 @@ const lonelyGraphInfo: GraphInfo = {
 
 const twinGermicule: Array<GermiculeItem> = [
   {
-    name: '🌞',
+    name: '🌏',
     risk: 3,
     germicule: [
       {
         name: '🌚',
         risk: 2,
         contact: 5,
-        description: 'friend of a friend',
+        description: 'sattelite',
       } as GermiculeItem,
     ],
   },
@@ -61,8 +61,8 @@ const twinGermicule: Array<GermiculeItem> = [
 const twinGraphInfo: GraphInfo = {
   nodes: [
     {
-      name: '🌞',
-      _label: '🌞',
+      name: '🌏',
+      _label: '🌏',
     },
     {
       name: '🌚',
@@ -71,10 +71,10 @@ const twinGraphInfo: GraphInfo = {
   ],
   edges: [
     {
-      source: '🌞',
+      source: '🌏',
       target: '🌚',
       value: 5,
-      _label: 'friend of a friend',
+      _label: 'sattelite',
     },
   ],
 };
@@ -115,5 +115,9 @@ describe('deconstructGermicule', () => {
   it('should handle lonely germicule data', () => {
     const result = deconstructGermicule(lonelyGermicule);
     expect(result).toMatchObject(lonelyGraphInfo);
+  });
+  it('should handle twin germicule data', () => {
+    const result = deconstructGermicule(twinGermicule);
+    expect(result).toMatchObject(twinGraphInfo);
   });
 });
