@@ -1,0 +1,32 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<GermiculeGraph  /> should match snapshot 1`] = `
+.c0 {
+  width: 'auto';
+  height: '50vh';
+  margin: 'auto';
+}
+
+<div
+  class="c0"
+  id="germicule-graph"
+>
+  <div
+    _echarts_instance_="ec_1598149906409"
+    class="echarts-for-react "
+    size-sensor-id="1"
+    style="height: 300px; user-select: none;"
+  >
+    <div
+      style="position: relative; width: 0px; height: 300px; padding: 0px; margin: 0px; border-width: 0px;"
+    />
+    <object
+      class="size-sensor-object"
+      data="about:blank"
+      style="display: block; position: absolute; top: 0px; left: 0px; height: 100%; width: 100%; overflow: hidden; pointer-events: none; z-index: -1; opacity: 0;"
+      tabindex="-1"
+      type="text/html"
+    />
+  </div>
+</div>
+`;
