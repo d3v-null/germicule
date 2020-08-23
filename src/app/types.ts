@@ -1,4 +1,10 @@
-export type GermiculeItem = {
+export type GermiculeLink = {
+  link: string;
+  contact?: number;
+  description?: string;
+};
+
+export type GermiculeNode = {
   name: string;
   label?: string;
   risk?: number;
@@ -6,7 +12,9 @@ export type GermiculeItem = {
   description?: string;
   cluster?: string;
   germicule: GermiculeItem[];
-} | null;
+};
+
+export type GermiculeItem = GermiculeNode | GermiculeLink | null;
 
 export type GermiculeCluster = {
   name: string;

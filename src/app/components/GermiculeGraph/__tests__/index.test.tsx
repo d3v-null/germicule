@@ -3,22 +3,14 @@ import { render } from '@testing-library/react';
 import echarts from 'echarts';
 import { GermiculeGraph, deconstructGermicule } from '..';
 
-import {
-  GermiculeItem,
-  // GermiculeCluster,
-  // GermiculeMeta,
-  // GraphNode,
-  // GraphEdge,
-  // GraphCategory,
-  GraphInfo,
-} from '../../../types';
+import { GermiculeItem, GraphInfo, GermiculeLink } from '../../../types';
 
-const emptyGermicule: Array<GermiculeItem> = [];
+const emptyGermicule: GermiculeItem[] = [];
 const emptyGraphInfo: GraphInfo = {
   nodes: [],
 };
 
-const unknownGermicule: Array<GermiculeItem> = [null as GermiculeItem];
+const unknownGermicule: GermiculeItem[] = [null as GermiculeItem];
 const unknownGraphInfo: GraphInfo = {
   nodes: [
     {
@@ -28,7 +20,7 @@ const unknownGraphInfo: GraphInfo = {
   ],
 };
 
-const lonelyGermicule: Array<GermiculeItem> = [
+const lonelyGermicule: GermiculeItem[] = [
   {
     name: '🦄',
     risk: 5,
@@ -44,37 +36,108 @@ const lonelyGraphInfo: GraphInfo = {
   ],
 };
 
-const twinGermicule: Array<GermiculeItem> = [
+const twinGermicule: GermiculeItem[] = [
   {
-    name: '🌏',
+    name: '🌞',
     risk: 3,
     germicule: [
       {
-        name: '🌚',
+        name: '🌏',
         risk: 2,
         contact: 5,
-        description: 'sattelite',
-      } as GermiculeItem,
+        description: 'planet',
+      },
     ],
   },
-];
+] as GermiculeItem[];
 const twinGraphInfo: GraphInfo = {
   nodes: [
     {
-      name: '🌏',
-      _label: '🌏',
+      name: '🌞',
+      _label: '🌞',
+      value: 3,
     },
     {
-      name: '🌚',
-      _label: '🌚',
+      name: '🌏',
+      _label: '🌏',
+      value: 2,
     },
   ],
   edges: [
     {
+      source: '🌞',
+      target: '🌏',
+      value: 5,
+      _label: 'planet',
+    },
+  ],
+};
+
+const linkGermicule: GermiculeItem[] = [
+  {
+    name: '🌞',
+    risk: 1,
+    germicule: [
+      {
+        name: '🌏',
+        risk: 2,
+        contact: 2,
+        description: 'planet',
+        germicule: [
+          {
+            name: '🌚',
+            risk: 3,
+            contact: 1,
+            description: 'sattelite',
+            germicule: [
+              {
+                link: '🌞',
+                contact: 5,
+                description: 'best buds',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+];
+const linkGraphInfo: GraphInfo = {
+  nodes: [
+    {
+      name: '🌞',
+      _label: '🌞',
+      value: 1,
+    },
+    {
+      name: '🌏',
+      _label: '🌏',
+      value: 2,
+    },
+    {
+      name: '🌚',
+      _label: '🌚',
+      value: 3,
+    },
+  ],
+  edges: [
+    {
+      source: '🌚',
+      target: '🌞',
+      value: 5,
+      _label: 'best buds',
+    },
+    {
       source: '🌏',
       target: '🌚',
-      value: 5,
+      value: 1,
       _label: 'sattelite',
+    },
+    {
+      source: '🌞',
+      target: '🌏',
+      value: 2,
+      _label: 'planet',
     },
   ],
 };
@@ -119,5 +182,9 @@ describe('deconstructGermicule', () => {
   it('should handle twin germicule data', () => {
     const result = deconstructGermicule(twinGermicule);
     expect(result).toMatchObject(twinGraphInfo);
+  });
+  it('should handle link germicule data', () => {
+    const result = deconstructGermicule(linkGermicule);
+    expect(result).toMatchObject(linkGraphInfo);
   });
 });

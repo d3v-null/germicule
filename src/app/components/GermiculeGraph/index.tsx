@@ -12,6 +12,7 @@ import {
   GermiculeItem,
   GermiculeMeta,
   GraphInfo,
+  GermiculeNode,
   GraphNode,
   GraphCategory,
   GraphEdge,
@@ -36,7 +37,7 @@ const DEFAULT_NODE: Partial<GraphNode> = {
 function toNode(item: GermiculeItem): GraphNode {
   let partial: Partial<GraphNode> = {
     ...DEFAULT_NODE,
-    _tooltip: JSON.stringify(item),
+    // _tooltip: JSON.stringify(item),
   };
   if (item === null) {
     return {
@@ -44,6 +45,7 @@ function toNode(item: GermiculeItem): GraphNode {
       name: `unknown ${getNextUnknown()}`,
     };
   }
+  item = item as GermiculeNode;
   const result: GraphNode = {
     ...partial,
     name: item.name,
@@ -59,8 +61,11 @@ function toNode(item: GermiculeItem): GraphNode {
 
 const DEFAULT_EDGE: Partial<GraphEdge> = {};
 
-function toPartialEdge(item: GermiculeItem): Partial<GraphEdge> {
-  let result: Partial<GraphEdge> = { ...DEFAULT_EDGE };
+function toPartialEdge(
+  item: GermiculeItem,
+  target: string,
+): Partial<GraphEdge> {
+  let result: Partial<GraphEdge> = { ...DEFAULT_EDGE, target };
   if (item && 'description' in item) {
     result._label = item.description;
     result._tooltip = item.description;
@@ -82,14 +87,15 @@ export function deconstructGermicule(members: Array<GermiculeItem>): GraphInfo {
     partialEdges: [],
   };
   members.forEach((member: GermiculeItem) => {
+    if (member && 'link' in member) {
+      result.partialEdges!.push(
+        toPartialEdge(member, member.link) as GraphEdge,
+      );
+      return;
+    }
     const node: GraphNode = toNode(member);
     result.nodes.push(node);
-    const partialEdge = {
-      ...toPartialEdge(member),
-      target: node.name,
-    } as GraphEdge;
-
-    result.partialEdges!.push(partialEdge);
+    result.partialEdges!.push(toPartialEdge(member, node.name) as GraphEdge);
     if (member && 'germicule' in member) {
       const childGraph = deconstructGermicule(member!.germicule);
       // console.log(`childGraph: ${JSON.stringify(childGraph)}`);
@@ -103,7 +109,6 @@ export function deconstructGermicule(members: Array<GermiculeItem>): GraphInfo {
           } as GraphEdge);
         });
       }
-      result.edges = result.edges!.concat(childGraph.edges!);
     }
   });
   return result;
