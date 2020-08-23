@@ -15,6 +15,7 @@ import {
   GermiculeNode,
   GraphNode,
   GraphEdge,
+  GraphCluster,
 } from '../../types';
 
 export type Props = {
@@ -72,7 +73,17 @@ function toNode(item: GermiculeItem): GraphNode {
 }
 
 const DEFAULT_EDGE: Partial<GraphEdge> = {
-  _label: '',
+  lineStyle: {
+    type: 'solid',
+  },
+};
+const DEFAULT_CLUSTER_EDGE: Partial<GraphEdge> = {
+  lineStyle: {
+    type: 'none',
+  },
+  label: {
+    show: false,
+  },
 };
 
 function toPartialEdge(
@@ -83,6 +94,8 @@ function toPartialEdge(
   if (item && 'description' in item) {
     result._label = item.description;
     result._tooltip = item.description;
+  } else {
+    result.label = { show: false };
   }
   if (item && 'contact' in item) {
     result.value = item.contact;
@@ -97,6 +110,7 @@ export function buildGraph(members: Array<GermiculeItem>): GraphInfo {
     nodes: [],
     edges: [],
     partialEdges: [],
+    clusters: new Map<string, GraphCluster>(),
   };
   members.forEach((member: GermiculeItem) => {
     if (member && 'link' in member) {
@@ -121,6 +135,36 @@ export function buildGraph(members: Array<GermiculeItem>): GraphInfo {
           } as GraphEdge);
         });
       }
+      childGraph.clusters?.forEach((childCluster, childClusterName) => {
+        if (result.clusters!.has(childClusterName)) {
+          const cluster = result.clusters!.get(childClusterName)!;
+          cluster.members!.push(...childCluster.members!);
+        } else {
+          result.clusters!.set(childClusterName, childCluster);
+        }
+      });
+    }
+    if (member && 'clusters' in member) {
+      member.clusters?.forEach(clusterName => {
+        if (result.clusters!.has(clusterName)) {
+          const cluster: GraphCluster = result.clusters!.get(clusterName)!;
+          if ('members' in cluster) {
+            cluster.members!.forEach(clusterMember => {
+              result.edges!.push({
+                ...DEFAULT_CLUSTER_EDGE,
+                source: node.name,
+                target: clusterMember,
+              });
+            });
+            cluster.members!.push(node.name);
+          }
+        } else {
+          result.clusters!.set(clusterName, {
+            name: clusterName,
+            members: [node.name],
+          } as GraphCluster);
+        }
+      });
     }
   });
   return result;

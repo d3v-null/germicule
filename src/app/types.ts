@@ -45,16 +45,17 @@ export type GraphEdge = {
   label?: object;
   _label?: string;
   _tooltip?: string;
+  lineStyle?: object;
 };
 
 export type GraphCluster = {
   name: string;
-  members: string[];
+  members?: string[];
 };
 
 export type GraphInfo = {
   nodes: GraphNode[];
   edges?: GraphEdge[];
   partialEdges?: Partial<GraphEdge[]>;
-  clusters?: GraphCluster[];
+  clusters?: Map<string, GraphCluster>;
 };

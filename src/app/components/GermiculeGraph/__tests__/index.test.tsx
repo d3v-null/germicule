@@ -116,8 +116,8 @@ const clusterGermicule: GermiculeItem[] = [
     germicule: [
       { name: '🔴', clusters: ['colors'] },
       { name: '🔵', clusters: ['colors'] },
-      { name: '🇦🇺', clusters: ['flags'] },
-      { name: '🇪🇺', clusters: ['flags'] },
+      { name: '⛳', clusters: ['flags'] },
+      { name: '🎌', clusters: ['flags'] },
     ],
   },
 ] as GermiculeItem[];
@@ -126,21 +126,25 @@ const clusterGraphInfo: GraphInfo = {
     { name: '🏳️‍🌈' },
     { name: '🔴' },
     { name: '🔵' },
-    { name: '🇦🇺' },
-    { name: '🇪🇺' },
+    { name: '⛳' },
+    { name: '🎌' },
   ],
   edges: [
+    { source: '🔵', target: '🔴' },
+    { source: '🎌', target: '⛳' },
+    { target: '🔴', source: '🏳️‍🌈' },
+    { target: '🔵', source: '🏳️‍🌈' },
+    { target: '⛳', source: '🏳️‍🌈' },
+    { target: '🎌', source: '🏳️‍🌈' },
     { source: '🏳️‍🌈', target: '🔴' },
     { source: '🏳️‍🌈', target: '🔵' },
-    { source: '🔵', target: '🔴' },
-    { source: '🏳️‍🌈', target: '🇦🇺' },
-    { source: '🏳️‍🌈', target: '🇪🇺' },
-    { source: '🇪🇺', target: '🇪🇺' },
+    { source: '🏳️‍🌈', target: '⛳' },
+    { source: '🏳️‍🌈', target: '🎌' },
   ],
-  clusters: [
-    { name: 'colors', members: ['🏳️‍🌈', '🔴', '🔵'] },
-    { name: 'flags', members: ['🏳️‍🌈', '🇦🇺', '🇪🇺'] },
-  ],
+  clusters: new Map([
+    ['colors', { name: 'colors', members: ['🔴', '🔵', '🏳️‍🌈'] }],
+    ['flags', { name: 'flags', members: ['⛳', '🎌', '🏳️‍🌈'] }],
+  ]),
 } as GraphInfo;
 
 let spy: any;
