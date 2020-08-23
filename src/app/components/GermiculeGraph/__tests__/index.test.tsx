@@ -44,6 +44,41 @@ const lonelyGraphInfo: GraphInfo = {
   ],
 };
 
+const twinGermicule: Array<GermiculeItem> = [
+  {
+    name: '🌞',
+    risk: 3,
+    germicule: [
+      {
+        name: '🌚',
+        risk: 2,
+        contact: 5,
+        description: 'friend of a friend',
+      } as GermiculeItem,
+    ],
+  },
+];
+const twinGraphInfo: GraphInfo = {
+  nodes: [
+    {
+      name: '🌞',
+      _label: '🌞',
+    },
+    {
+      name: '🌚',
+      _label: '🌚',
+    },
+  ],
+  edges: [
+    {
+      source: '🌞',
+      target: '🌚',
+      value: 5,
+      _label: 'friend of a friend',
+    },
+  ],
+};
+
 describe('<GermiculeGraph  />', () => {
   it('should match snapshot', () => {
     const loadingIndicator = render(
@@ -65,5 +100,9 @@ describe('deconstructGermicule', () => {
   it('should handle lonely germicule data', () => {
     const result = deconstructGermicule(lonelyGermicule);
     expect(result).toMatchObject(lonelyGraphInfo);
+  });
+  it('should handle twin germicule data', () => {
+    const result = deconstructGermicule(twinGermicule);
+    expect(result).toMatchObject(twinGraphInfo);
   });
 });

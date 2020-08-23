@@ -94,6 +94,11 @@ export class GermiculeGraph extends React.Component<Props> {
             position: 'inside',
             formatter: params => params.data._label,
           },
+          links: {
+            label: {
+              formatter: params => params.data._label,
+            },
+          },
           draggable: true,
           nodes: graphInfo.nodes,
           categories: graphInfo.categories,

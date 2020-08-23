@@ -31,6 +31,8 @@ export type GraphNode = {
 export type GraphEdge = {
   source: string;
   target: string;
+  value: number;
+  _label?: string;
 };
 
 export type GraphCategory = {
