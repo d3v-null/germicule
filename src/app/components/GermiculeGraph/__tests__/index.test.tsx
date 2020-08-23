@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-
+import echarts from 'echarts';
 import { GermiculeGraph, deconstructGermicule } from '..';
 
 import {
@@ -79,6 +79,21 @@ const twinGraphInfo: GraphInfo = {
   ],
 };
 
+let spy: any;
+
+beforeAll(() => {
+  spy = jest.spyOn(echarts, 'getInstanceByDom').mockImplementation(() => {
+    return {
+      hideLoading: jest.fn(),
+      setOption: jest.fn(),
+      showLoading: jest.fn(),
+    };
+  });
+});
+afterAll(() => {
+  spy.mockRestore();
+});
+
 describe('<GermiculeGraph  />', () => {
   it('should match snapshot', () => {
     const loadingIndicator = render(
@@ -100,9 +115,5 @@ describe('deconstructGermicule', () => {
   it('should handle lonely germicule data', () => {
     const result = deconstructGermicule(lonelyGermicule);
     expect(result).toMatchObject(lonelyGraphInfo);
-  });
-  it('should handle twin germicule data', () => {
-    const result = deconstructGermicule(twinGermicule);
-    expect(result).toMatchObject(twinGraphInfo);
   });
 });
