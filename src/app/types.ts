@@ -1,11 +1,12 @@
-export type Germicule = {
+export type GermiculeItem = {
   name: string;
+  label?: string;
   risk?: number;
   contact?: number;
   description?: string;
   cluster?: string;
-  germicule: Array<Germicule>;
-};
+  germicule: Array<GermiculeItem>;
+} | null;
 
 export type GermiculeCluster = {
   name: string;
@@ -15,13 +16,14 @@ export type GermiculeCluster = {
 export type GermiculeMeta = {
   version?: string;
   clusters?: Array<GermiculeCluster>;
-  germicules: Array<Germicule>;
+  germicules: Array<GermiculeItem>;
 };
 
 export type GraphNode = {
   name: string;
-  label?: string;
+  _label?: string;
   value?: number;
+  symbolSize?: number;
   tooltip?: string;
   category?: string;
 };
@@ -32,7 +34,7 @@ export type GraphEdge = {
 };
 
 export type GraphCategory = {
-  name: object;
+  name: string;
 };
 
 export type GraphInfo = {

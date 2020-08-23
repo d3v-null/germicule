@@ -9,22 +9,62 @@ import styled from 'styled-components/macro';
 import ReactEcharts from 'echarts-for-react';
 // import webkitDep from '../../data/webkitDep.json.js';
 import {
-  Germicule,
+  GermiculeItem,
   GermiculeMeta,
   // GraphNode,
   // GraphEdge,
   // GraphCategory,
   GraphInfo,
+  GraphNode,
+  GraphCategory,
 } from '../../types';
 
 export type Props = {
   data: GermiculeMeta;
 };
 
-export function deconstructGermicule(germicule: Array<Germicule>): GraphInfo {
-  return {
+let UNKNOWN_COUNT: number = 0;
+function getNextUnknown() {
+  return UNKNOWN_COUNT++;
+}
+
+const DEFAULT_NODE: GraphNode = {
+  name: '❓',
+  _label: '❓',
+  symbolSize: 30,
+};
+
+function toNode(item: GermiculeItem): GraphNode {
+  if (item === null) {
+    return {
+      ...DEFAULT_NODE,
+      name: `unknown ${getNextUnknown()}`,
+    };
+  }
+  const result: GraphNode = {
+    ...DEFAULT_NODE,
+    name: item.name,
+    _label: item.name,
+  };
+  if (item.risk) {
+    result.value = item.risk;
+  }
+  return result;
+}
+
+// TODO(dev): Rename to buildGraph
+// TODO(dev): Implement links
+export function deconstructGermicule(
+  germicules: Array<GermiculeItem>,
+): GraphInfo {
+  const result: GraphInfo = {
     nodes: [],
   };
+  germicules.forEach((item: GermiculeItem) => {
+    const node = toNode(item);
+    result.nodes.push(node);
+  });
+  return result;
 }
 
 export class GermiculeGraph extends React.Component<Props> {
@@ -35,9 +75,14 @@ export class GermiculeGraph extends React.Component<Props> {
     const graphInfo: GraphInfo = deconstructGermicule(
       this.props.data.germicules,
     );
+    console.log(`graphInfo ${JSON.stringify(graphInfo)}`);
+    const categoryNames =
+      'categories' in graphInfo
+        ? graphInfo.categories!.map((category: GraphCategory) => category.name)
+        : [];
     return {
       legend: {
-        data: ['HTMLElement', 'WebGL', 'SVG', 'CSS', 'Other'],
+        data: categoryNames,
       },
       series: [
         {
@@ -45,8 +90,9 @@ export class GermiculeGraph extends React.Component<Props> {
           layout: 'force',
           animation: false,
           label: {
-            position: 'right',
-            formatter: '{b}',
+            show: true,
+            position: 'inside',
+            formatter: params => params.data._label,
           },
           draggable: true,
           nodes: graphInfo.nodes,

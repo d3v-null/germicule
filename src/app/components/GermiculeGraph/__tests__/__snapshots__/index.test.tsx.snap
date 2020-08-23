@@ -12,7 +12,7 @@ exports[`<GermiculeGraph  /> should match snapshot 1`] = `
   id="germicule-graph"
 >
   <div
-    _echarts_instance_="ec_1598149906409"
+    _echarts_instance_="ec_1598156951158"
     class="echarts-for-react "
     size-sensor-id="1"
     style="height: 300px; user-select: none;"
