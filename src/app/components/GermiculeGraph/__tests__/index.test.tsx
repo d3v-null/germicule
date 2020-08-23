@@ -1,9 +1,9 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import echarts from 'echarts';
-import { GermiculeGraph, deconstructGermicule } from '..';
+import { GermiculeGraph, buildGraph } from '..';
 
-import { GermiculeItem, GraphInfo, GermiculeLink } from '../../../types';
+import { GermiculeItem, GraphInfo } from '../../../types';
 
 const emptyGermicule: GermiculeItem[] = [];
 const emptyGraphInfo: GraphInfo = {
@@ -76,23 +76,17 @@ const twinGraphInfo: GraphInfo = {
 const linkGermicule: GermiculeItem[] = [
   {
     name: '🌞',
-    risk: 1,
     germicule: [
       {
         name: '🌏',
-        risk: 2,
-        contact: 2,
         description: 'planet',
         germicule: [
           {
             name: '🌚',
-            risk: 3,
-            contact: 1,
             description: 'sattelite',
             germicule: [
               {
                 link: '🌞',
-                contact: 5,
                 description: 'best buds',
               },
             ],
@@ -104,43 +98,50 @@ const linkGermicule: GermiculeItem[] = [
 ];
 const linkGraphInfo: GraphInfo = {
   nodes: [
-    {
-      name: '🌞',
-      _label: '🌞',
-      value: 1,
-    },
-    {
-      name: '🌏',
-      _label: '🌏',
-      value: 2,
-    },
-    {
-      name: '🌚',
-      _label: '🌚',
-      value: 3,
-    },
+    { name: '🌞', _label: '🌞' },
+    { name: '🌏', _label: '🌏' },
+    { name: '🌚', _label: '🌚' },
   ],
   edges: [
-    {
-      source: '🌚',
-      target: '🌞',
-      value: 5,
-      _label: 'best buds',
-    },
-    {
-      source: '🌏',
-      target: '🌚',
-      value: 1,
-      _label: 'sattelite',
-    },
-    {
-      source: '🌞',
-      target: '🌏',
-      value: 2,
-      _label: 'planet',
-    },
+    { source: '🌚', target: '🌞' },
+    { source: '🌏', target: '🌚' },
+    { source: '🌞', target: '🌏' },
   ],
 };
+
+const clusterGermicule: GermiculeItem[] = [
+  {
+    name: '🏳️‍🌈',
+    clusters: ['colors', 'flags'],
+    germicule: [
+      { name: '🔴', clusters: ['colors'] },
+      { name: '🔵', clusters: ['colors'] },
+      { name: '🇦🇺', clusters: ['flags'] },
+      { name: '🇪🇺', clusters: ['flags'] },
+    ],
+  },
+] as GermiculeItem[];
+const clusterGraphInfo: GraphInfo = {
+  nodes: [
+    { name: '🏳️‍🌈' },
+    { name: '🔴' },
+    { name: '🔵' },
+    { name: '🇦🇺' },
+    { name: '🇪🇺' },
+  ],
+  edges: [
+    { source: '🏳️‍🌈', target: '🔴' },
+    { source: '🏳️‍🌈', target: '🔵' },
+    { source: '🔵', target: '🔴' },
+    { source: '🏳️‍🌈', target: '🇦🇺' },
+    { source: '🏳️‍🌈', target: '🇪🇺' },
+    { source: '🇪🇺', target: '🇪🇺' },
+  ],
+  clusters: [
+    { name: 'colors', members: ['🏳️‍🌈', '🔴', '🔵'] },
+    { name: 'flags', members: ['🏳️‍🌈', '🇦🇺', '🇪🇺'] },
+  ],
+} as GraphInfo;
 
 let spy: any;
 
@@ -168,23 +169,27 @@ describe('<GermiculeGraph  />', () => {
 
 describe('deconstructGermicule', () => {
   it('should handle empty germicule data', () => {
-    const result = deconstructGermicule(emptyGermicule);
+    const result = buildGraph(emptyGermicule);
     expect(result).toMatchObject(emptyGraphInfo);
   });
   it('should handle unknown germicule data', () => {
-    const result = deconstructGermicule(unknownGermicule);
+    const result = buildGraph(unknownGermicule);
     expect(result).toMatchObject(unknownGraphInfo);
   });
   it('should handle lonely germicule data', () => {
-    const result = deconstructGermicule(lonelyGermicule);
+    const result = buildGraph(lonelyGermicule);
     expect(result).toMatchObject(lonelyGraphInfo);
   });
   it('should handle twin germicule data', () => {
-    const result = deconstructGermicule(twinGermicule);
+    const result = buildGraph(twinGermicule);
     expect(result).toMatchObject(twinGraphInfo);
   });
   it('should handle link germicule data', () => {
-    const result = deconstructGermicule(linkGermicule);
+    const result = buildGraph(linkGermicule);
     expect(result).toMatchObject(linkGraphInfo);
+  });
+  it('should handle cluster germicule data', () => {
+    const result = buildGraph(clusterGermicule);
+    expect(result).toMatchObject(clusterGraphInfo);
   });
 });

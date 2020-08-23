@@ -10,7 +10,7 @@ export type GermiculeNode = {
   risk?: number;
   contact?: number;
   description?: string;
-  cluster?: string;
+  clusters?: string[];
   germicule: GermiculeItem[];
 };
 
@@ -47,13 +47,14 @@ export type GraphEdge = {
   _tooltip?: string;
 };
 
-export type GraphCategory = {
+export type GraphCluster = {
   name: string;
+  members: string[];
 };
 
 export type GraphInfo = {
   nodes: GraphNode[];
   edges?: GraphEdge[];
   partialEdges?: Partial<GraphEdge[]>;
-  categories?: GraphCategory[];
+  clusters?: GraphCluster[];
 };
