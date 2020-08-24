@@ -4,7 +4,6 @@
  *
  */
 import React from 'react';
-import styled from 'styled-components/macro';
 // import { useTranslation } from 'react-i18next';
 import ReactEcharts from 'echarts-for-react';
 import {
@@ -19,6 +18,7 @@ import {
 
 export type Props = {
   data: GermiculeMeta;
+  style?: object;
 };
 
 let UNKNOWN_COUNT: number = 0;
@@ -39,8 +39,11 @@ const CATEGORY_INFO = [
   { name: 'unknown', itemStyle: { color: BACKGROUND_COLOR } },
 ];
 
+const UNKNOWN_LABEL: string = '❓';
+
 const DEFAULT_NODE: Partial<GraphNode> = {
-  _label: '❓',
+  name: UNKNOWN_LABEL,
+  _label: UNKNOWN_LABEL,
   symbolSize: SYMBOL_SIZE,
   category: CATEGORY_INFO.length - 1,
 };
@@ -167,13 +170,20 @@ export function buildGraph(members: Array<GermiculeItem>): GraphInfo {
   return result;
 }
 
+const DEFAULT_GRAPH_INFO: GraphInfo = {
+  nodes: [{ ...DEFAULT_NODE, _tooltip: 'your germicule is empty' }],
+} as GraphInfo;
+
 export class GermiculeGraph extends React.Component<Props> {
   // const { t, i18n } = useTranslation();
   // {t('')}
 
   getOption() {
-    const graphInfo: GraphInfo = buildGraph(this.props.data.germicules);
-    console.log('graphInfo', graphInfo);
+    const graphInfo: GraphInfo =
+      this.props.data && 'germicules' in this.props.data
+        ? buildGraph(this.props.data.germicules)
+        : DEFAULT_GRAPH_INFO;
+    // console.log('graphInfo', graphInfo);
     // const categoryNames =
     //   'categories' in graphInfo
     //     ? graphInfo.categories!.map((category: GraphCategory) => category.name)
@@ -226,7 +236,7 @@ export class GermiculeGraph extends React.Component<Props> {
 
   render() {
     return (
-      <Div id="germicule-graph">
+      <div id="germicule-graph" style={this.props.style}>
         <ReactEcharts
           option={this.getOption()}
           notMerge={true}
@@ -236,13 +246,7 @@ export class GermiculeGraph extends React.Component<Props> {
           // onEvents={EventsDict}
           style={{ height: '100vh' }}
         />
-      </Div>
+      </div>
     );
   }
 }
-
-const Div = styled.div`
-  width: auto;
-  height: 100vh;
-  margin: auto;
-`;
