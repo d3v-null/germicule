@@ -14,7 +14,7 @@ export type GermiculeNode = {
   risk?: number;
   contact?: number;
   description?: string;
-  clusters?: ClusterName[];
+  cluster?: ClusterName;
   germicule: GermiculeItem[];
 };
 

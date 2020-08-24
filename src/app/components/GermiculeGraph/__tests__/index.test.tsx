@@ -112,12 +112,12 @@ const linkGraphInfo: GraphInfo = {
 const clusterGermicule: GermiculeItem[] = [
   {
     name: '🏳️‍🌈',
-    clusters: ['colors', 'flags'],
+    cluster: 'flags',
     germicule: [
-      { name: '🔴', clusters: ['colors'] },
-      { name: '🔵', clusters: ['colors'] },
-      { name: '⛳', clusters: ['flags'] },
-      { name: '🎌', clusters: ['flags'] },
+      { name: '🔴', cluster: 'colors' },
+      { name: '🔵', cluster: 'colors' },
+      { name: '⛳', cluster: 'flags' },
+      { name: '🎌', cluster: 'flags' },
     ],
   },
 ] as GermiculeItem[];
@@ -136,13 +136,11 @@ const clusterGraphInfo: GraphInfo = {
     { target: '🔵', source: '🏳️‍🌈' },
     { target: '⛳', source: '🏳️‍🌈' },
     { target: '🎌', source: '🏳️‍🌈' },
-    { source: '🏳️‍🌈', target: '🔴' },
-    { source: '🏳️‍🌈', target: '🔵' },
     { source: '🏳️‍🌈', target: '⛳' },
     { source: '🏳️‍🌈', target: '🎌' },
   ],
   clusters: new Map([
-    ['colors', { name: 'colors', members: ['🔴', '🔵', '🏳️‍🌈'] }],
+    ['colors', { name: 'colors', members: ['🔴', '🔵'] }],
     ['flags', { name: 'flags', members: ['⛳', '🎌', '🏳️‍🌈'] }],
   ]),
 } as GraphInfo;

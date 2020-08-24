@@ -141,29 +141,27 @@ export function buildGraph(members: Array<GermiculeItem>): GraphInfo {
           }
         });
       }
-      if (member && 'clusters' in member) {
-        member.clusters?.forEach(clusterName => {
-          if (accumulator.clusters!.has(clusterName)) {
-            const cluster: GraphCluster = accumulator.clusters!.get(
-              clusterName,
-            )!;
-            if ('members' in cluster) {
-              cluster.members!.forEach(clusterMember => {
-                accumulator.edges!.push({
-                  ...DEFAULT_CLUSTER_EDGE,
-                  source: node.name,
-                  target: clusterMember,
-                });
+      if (member && 'cluster' in member) {
+        if (accumulator.clusters!.has(member.cluster!)) {
+          const cluster: GraphCluster = accumulator.clusters!.get(
+            member.cluster!,
+          )!;
+          if ('members' in cluster) {
+            cluster.members!.forEach(clusterMember => {
+              accumulator.edges!.push({
+                ...DEFAULT_CLUSTER_EDGE,
+                source: node.name,
+                target: clusterMember,
               });
-              cluster.members!.push(node.name);
-            }
-          } else {
-            accumulator.clusters!.set(clusterName, {
-              name: clusterName,
-              members: [node.name],
-            } as GraphCluster);
+            });
+            cluster.members!.push(node.name);
           }
-        });
+        } else {
+          accumulator.clusters!.set(member.cluster!, {
+            name: member.cluster,
+            members: [node.name],
+          } as GraphCluster);
+        }
       }
       return accumulator;
     },

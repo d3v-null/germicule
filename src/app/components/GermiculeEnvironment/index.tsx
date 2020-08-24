@@ -27,7 +27,7 @@ interface State {
 const DEFAULT_SRC = {
   version: '0.2',
   clusters: [{ name: 'cluster' }],
-  germicules: [{ name: '❓', clusters: ['cluster'] }],
+  germicules: [{ name: '❓', cluster: 'cluster' }],
 } as GermiculeMeta;
 
 const SIZING = {

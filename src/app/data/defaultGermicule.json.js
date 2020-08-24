@@ -16,7 +16,7 @@ export default {
           risk: 2,
           contact: 1,
           description: 'Ex-housemate',
-          clusters: ['Lygon'],
+          cluster: 'Lygon',
           germicule: [
             {
               name: '🐭',
@@ -37,26 +37,26 @@ export default {
           risk: null,
           contact: 1,
           description: 'Ex-housemate',
-          clusters: ['Lygon'],
+          cluster: 'Lygon',
           germicule: [
             {
               name: '😿',
               risk: 1.5,
               contact: 0,
               description: 'Partner',
-              clusters: ['Union'],
+              cluster: 'Union',
               germicule: [
                 {
                   name: '🦕',
                   risk: null,
                   contact: 1,
                   description: 'Housemate',
-                  clusters: ['Union'],
+                  cluster: 'Union',
                   germicule: [null],
                 },
                 {
                   name: '🔧',
-                  clusters: ['Union'],
+                  cluster: 'Union',
                   germicule: [null],
                 },
               ],
@@ -74,7 +74,7 @@ export default {
           risk: 1.5,
           contact: 1,
           description: 'Housemate',
-          clusters: ['Kewties'],
+          cluster: 'Kewties',
           germicule: [
             {
               name: '🔮',
@@ -94,21 +94,21 @@ export default {
           risk: 1.2,
           contact: 1,
           description: 'Housemate',
-          clusters: ['Kewties'],
+          cluster: 'Kewties',
         },
         {
           name: '👷',
           risk: 1.5,
           contact: 1,
           description: 'Housemate',
-          clusters: ['Kewties'],
+          cluster: 'Kewties',
         },
         {
           name: '🌳',
           risk: 2,
           contact: 1,
           description: 'Housemate,',
-          clusters: ['Kewties'],
+          cluster: 'Kewties',
           germicule: [
             {
               name: '🍎',
@@ -121,7 +121,7 @@ export default {
           risk: 1.1,
           contact: 1,
           description: 'Potential Housemate',
-          clusters: ['Kewties'],
+          cluster: 'Kewties',
           germicule: [
             {
               link: '👓',
@@ -133,7 +133,7 @@ export default {
           name: '👓',
           contact: 1,
           dscription: 'Potential Housemate',
-          clusters: ['Kewties'],
+          cluster: 'Kewties',
         },
       ],
     },
