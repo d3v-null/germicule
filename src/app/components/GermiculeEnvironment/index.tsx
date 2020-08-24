@@ -16,11 +16,8 @@ interface Props {
   src?: object;
 }
 
-type BoxDimensions = { width: number; height: number };
-
 interface State {
   src: object;
-  dimensions?: BoxDimensions;
   splitterVertical: boolean;
   splitterPrimaryMin: number;
   splitterSecondaryMin: number;
