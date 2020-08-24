@@ -4,20 +4,24 @@ export type GermiculeLink = {
   description?: string;
 };
 
+export type ReservedClusterNames = '❓';
+
+export type ClusterName = Exclude<string, ReservedClusterNames>;
+
 export type GermiculeNode = {
   name: string;
   label?: string;
   risk?: number;
   contact?: number;
   description?: string;
-  clusters?: string[];
+  clusters?: ClusterName[];
   germicule: GermiculeItem[];
 };
 
 export type GermiculeItem = GermiculeNode | GermiculeLink | null;
 
 export type GermiculeCluster = {
-  name: string;
+  name: ClusterName;
   location?: string;
   members?: string[];
 };
