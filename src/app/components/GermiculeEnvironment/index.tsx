@@ -65,13 +65,10 @@ export class GermiculeEnvironment extends React.Component<Props, State> {
   }
 
   onUpdateDimensions() {
-    console.log('onUpdateDimensions', this.splitterLayout);
     if (this.splitterLayout !== undefined) {
       const splitterLayout = this.splitterLayout.current;
       const splitterLayoutDimensions = splitterLayout.container.getBoundingClientRect();
-      console.log('layout dimensions', splitterLayoutDimensions);
       const splitterDividerDimensions = splitterLayout.splitter.getBoundingClientRect();
-      console.log('divider dimensions', splitterDividerDimensions);
 
       const layoutWidth = splitterLayoutDimensions.width;
       const layoutHeight = splitterLayoutDimensions.height;
@@ -100,7 +97,6 @@ export class GermiculeEnvironment extends React.Component<Props, State> {
         newState.splitterSecondaryMin = SIZING.editorMinHeight;
       }
 
-      console.log('newState', newState);
       this.setState(newState as State);
     }
   }

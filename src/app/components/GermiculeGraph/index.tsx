@@ -231,7 +231,7 @@ export class GermiculeGraph extends React.Component<Props> {
   }
 
   onChartReadyCallback() {
-    console.log('onChartReadyCallback');
+    // console.log('onChartReadyCallback');
   }
 
   render() {
