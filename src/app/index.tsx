@@ -18,11 +18,11 @@ import { NotFoundPage } from './components/NotFoundPage/Loadable';
 export function App() {
   return (
     <BrowserRouter>
-      <Helmet
-        titleTemplate="%s - React Boilerplate"
-        defaultTitle="React Boilerplate"
-      >
-        <meta name="description" content="A React Boilerplate application" />
+      <Helmet titleTemplate="%s - Germicule" defaultTitle="Germicule">
+        <meta
+          name="description"
+          content="Visualise your contacts and their covid risk factors"
+        />
       </Helmet>
 
       <Switch>
