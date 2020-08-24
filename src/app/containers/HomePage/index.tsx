@@ -9,7 +9,10 @@ export function HomePage() {
     <>
       <Helmet>
         <title>Home Page</title>
-        <meta name="description" content="A Boilerplate application homepage" />
+        <meta
+          name="description"
+          content="Visualise your contacts and their covid risk factors"
+        />
       </Helmet>
       <GermiculeEnvironment src={defaultGermicule} />
     </>
