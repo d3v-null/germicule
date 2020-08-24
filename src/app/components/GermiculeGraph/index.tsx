@@ -213,9 +213,9 @@ export class GermiculeGraph extends React.Component<Props> {
           nodes: graphInfo.nodes,
           // categories: graphInfo.categories,
           force: {
-            edgeLength: 100,
-            repulsion: 300,
-            // gravity: 0.2,
+            edgeLength: 150,
+            repulsion: 500,
+            gravity: 0.2,
           },
           edges: graphInfo.edges,
         },
