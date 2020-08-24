@@ -1,9 +1,8 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { GermiculeGraph } from '../../components/GermiculeGraph';
+import { GermiculeEnvironment } from '../../components/GermiculeEnvironment';
 import defaultGermicule from '../../data/defaultGermicule.json.js';
-
-import { GermiculeMeta } from '../../types';
+// import styled from 'styled-components/macro';
 
 export function HomePage() {
   return (
@@ -12,7 +11,7 @@ export function HomePage() {
         <title>Home Page</title>
         <meta name="description" content="A Boilerplate application homepage" />
       </Helmet>
-      <GermiculeGraph data={defaultGermicule as GermiculeMeta} />
+      <GermiculeEnvironment src={defaultGermicule} />
     </>
   );
 }
