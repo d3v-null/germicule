@@ -19,6 +19,8 @@ export class GermiculeEditor extends React.Component<Props> {
     return (
       <ReactJson
         src={this.props.src}
+        displayObjectSize={false}
+        displayDataTypes={false}
         onEdit={params => {
           // console.log('onEdit', params);
           this.setState({ src: params.updated_src });

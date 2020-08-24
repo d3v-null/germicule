@@ -244,7 +244,7 @@ export class GermiculeGraph extends React.Component<Props> {
           theme={'theme_name'}
           onChartReady={this.onChartReadyCallback}
           // onEvents={EventsDict}
-          style={{ height: '100vh' }}
+          style={{ height: '100vh', width: '100%' }}
         />
       </div>
     );

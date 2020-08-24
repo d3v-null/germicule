@@ -7,7 +7,7 @@ exports[`<GermiculeGraph  /> should match snapshot 1`] = `
   <div
     class="echarts-for-react "
     size-sensor-id="1"
-    style="height: 100vh;"
+    style="height: 100vh; width: 100%;"
   >
     <object
       class="size-sensor-object"
