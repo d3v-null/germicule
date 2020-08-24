@@ -106,68 +106,74 @@ function toPartialEdge(
 }
 
 export function buildGraph(members: Array<GermiculeItem>): GraphInfo {
-  const result: GraphInfo = {
-    nodes: [],
-    edges: [],
-    partialEdges: [],
-    clusters: new Map<string, GraphCluster>(),
-  };
-  members.forEach((member: GermiculeItem) => {
-    if (member && 'link' in member) {
-      result.partialEdges!.push(
-        toPartialEdge(member, member.link) as GraphEdge,
+  return members.reduce(
+    (accumulator: GraphInfo, member: GermiculeItem): GraphInfo => {
+      if (member && 'link' in member) {
+        accumulator.partialEdges!.push(
+          toPartialEdge(member, member.link) as GraphEdge,
+        );
+        return accumulator;
+      }
+      const node: GraphNode = toNode(member);
+      accumulator.nodes.push(node);
+      accumulator.partialEdges!.push(
+        toPartialEdge(member, node.name) as GraphEdge,
       );
-      return;
-    }
-    const node: GraphNode = toNode(member);
-    result.nodes.push(node);
-    result.partialEdges!.push(toPartialEdge(member, node.name) as GraphEdge);
-    if (member && 'germicule' in member) {
-      const childGraph = buildGraph(member!.germicule);
-      // console.log(`childGraph: ${JSON.stringify(childGraph)}`);
-      result.nodes.push(...childGraph.nodes);
-      result.edges!.push(...childGraph.edges!);
-      if ('partialEdges' in childGraph) {
-        childGraph.partialEdges!.forEach(partialChildEdge => {
-          result.edges!.push({
-            ...partialChildEdge,
-            source: node.name,
-          } as GraphEdge);
+      if (member && 'germicule' in member) {
+        const childGraph = buildGraph(member!.germicule);
+        // console.log(`childGraph: ${JSON.stringify(childGraph)}`);
+        accumulator.nodes.push(...childGraph.nodes);
+        accumulator.edges!.push(...childGraph.edges!);
+        if ('partialEdges' in childGraph) {
+          childGraph.partialEdges!.forEach(partialChildEdge => {
+            accumulator.edges!.push({
+              ...partialChildEdge,
+              source: node.name,
+            } as GraphEdge);
+          });
+        }
+        childGraph.clusters?.forEach((childCluster, childClusterName) => {
+          if (accumulator.clusters!.has(childClusterName)) {
+            const cluster = accumulator.clusters!.get(childClusterName)!;
+            cluster.members!.push(...childCluster.members!);
+          } else {
+            accumulator.clusters!.set(childClusterName, childCluster);
+          }
         });
       }
-      childGraph.clusters?.forEach((childCluster, childClusterName) => {
-        if (result.clusters!.has(childClusterName)) {
-          const cluster = result.clusters!.get(childClusterName)!;
-          cluster.members!.push(...childCluster.members!);
-        } else {
-          result.clusters!.set(childClusterName, childCluster);
-        }
-      });
-    }
-    if (member && 'clusters' in member) {
-      member.clusters?.forEach(clusterName => {
-        if (result.clusters!.has(clusterName)) {
-          const cluster: GraphCluster = result.clusters!.get(clusterName)!;
-          if ('members' in cluster) {
-            cluster.members!.forEach(clusterMember => {
-              result.edges!.push({
-                ...DEFAULT_CLUSTER_EDGE,
-                source: node.name,
-                target: clusterMember,
+      if (member && 'clusters' in member) {
+        member.clusters?.forEach(clusterName => {
+          if (accumulator.clusters!.has(clusterName)) {
+            const cluster: GraphCluster = accumulator.clusters!.get(
+              clusterName,
+            )!;
+            if ('members' in cluster) {
+              cluster.members!.forEach(clusterMember => {
+                accumulator.edges!.push({
+                  ...DEFAULT_CLUSTER_EDGE,
+                  source: node.name,
+                  target: clusterMember,
+                });
               });
-            });
-            cluster.members!.push(node.name);
+              cluster.members!.push(node.name);
+            }
+          } else {
+            accumulator.clusters!.set(clusterName, {
+              name: clusterName,
+              members: [node.name],
+            } as GraphCluster);
           }
-        } else {
-          result.clusters!.set(clusterName, {
-            name: clusterName,
-            members: [node.name],
-          } as GraphCluster);
-        }
-      });
-    }
-  });
-  return result;
+        });
+      }
+      return accumulator;
+    },
+    {
+      nodes: [],
+      edges: [],
+      partialEdges: [],
+      clusters: new Map<string, GraphCluster>(),
+    } as GraphInfo,
+  );
 }
 
 const DEFAULT_GRAPH_INFO: GraphInfo = {
