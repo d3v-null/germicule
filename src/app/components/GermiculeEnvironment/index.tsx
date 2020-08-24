@@ -6,8 +6,6 @@
  *
  */
 import React from 'react';
-// import styled from 'styled-components/macro';
-// import { useTranslation } from 'react-i18next';
 import { GermiculeGraph } from '../../components/GermiculeGraph';
 import { GermiculeEditor } from '../../components/GermiculeEditor';
 import { GermiculeMeta } from '../../types';
@@ -51,9 +49,6 @@ const DEFAULT_STATE = {
 };
 
 export class GermiculeEnvironment extends React.Component<Props, State> {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // const { t, i18n } = useTranslation();
-  // {t('')}
   splitterLayout: React.RefObject<SplitterLayout>;
 
   constructor(props: Props) {
@@ -66,7 +61,6 @@ export class GermiculeEnvironment extends React.Component<Props, State> {
   }
 
   onUpdateSrc(params: { src: object }) {
-    // console.log('onUpdateSrc', params);
     this.setState({ src: params.src });
   }
 
@@ -109,19 +103,6 @@ export class GermiculeEnvironment extends React.Component<Props, State> {
       console.log('newState', newState);
       this.setState(newState as State);
     }
-    // const newState = {
-    //   dimensions: {
-    //     width: window.innerWidth,
-    //     height: window.innerHeight,
-    //   } as BoxDimensions,
-    // };
-    // if(this.splitterLayout !== undefined) {
-    //   if(this.splitterLayout.current.splitter !== undefined) {
-
-    //   }
-    // }
-    // this.setState(newState);
-    // if(dimensions.width > )
   }
 
   componentDidMount() {
