@@ -52,16 +52,8 @@ const twinGermicule: GermiculeItem[] = [
 ] as GermiculeItem[];
 const twinGraphInfo: GraphInfo = {
   nodes: [
-    {
-      name: '🌞',
-      _label: '🌞',
-      value: 3,
-    },
-    {
-      name: '🌏',
-      _label: '🌏',
-      value: 2,
-    },
+    { name: '🌏', _label: '🌏', value: 2 },
+    { name: '🌞', _label: '🌞', value: 3 },
   ],
   edges: [
     {
@@ -98,9 +90,9 @@ const linkGermicule: GermiculeItem[] = [
 ];
 const linkGraphInfo: GraphInfo = {
   nodes: [
-    { name: '🌞', _label: '🌞' },
-    { name: '🌏', _label: '🌏' },
     { name: '🌚', _label: '🌚' },
+    { name: '🌏', _label: '🌏' },
+    { name: '🌞', _label: '🌞' },
   ],
   edges: [
     { source: '🌚', target: '🌞' },
@@ -123,11 +115,11 @@ const clusterGermicule: GermiculeItem[] = [
 ] as GermiculeItem[];
 const clusterGraphInfo: GraphInfo = {
   nodes: [
-    { name: '🏳️‍🌈' },
-    { name: '🔴' },
-    { name: '🔵' },
-    { name: '⛳' },
-    { name: '🎌' },
+    { name: '🔴', category: 1 },
+    { name: '🔵', category: 1 },
+    { name: '⛳', category: 2 },
+    { name: '🎌', category: 2 },
+    { name: '🏳️‍🌈', category: 2 },
   ],
   edges: [
     { source: '🔵', target: '🔴' },
@@ -140,8 +132,9 @@ const clusterGraphInfo: GraphInfo = {
     { source: '🏳️‍🌈', target: '🎌' },
   ],
   clusters: new Map([
-    ['colors', { name: 'colors', members: ['🔴', '🔵'] }],
-    ['flags', { name: 'flags', members: ['⛳', '🎌', '🏳️‍🌈'] }],
+    ['unknown', { id: 0, name: 'unknown', members: [] }],
+    ['colors', { id: 1, name: 'colors', members: ['🔴', '🔵'] }],
+    ['flags', { id: 2, name: 'flags', members: ['⛳', '🎌', '🏳️‍🌈'] }],
   ]),
 } as GraphInfo;
 

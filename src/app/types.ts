@@ -40,6 +40,7 @@ export type GraphNode = {
   value?: number;
   symbolSize?: number;
   category?: number;
+  itemStyle?: object;
 };
 
 export type GraphEdge = {
@@ -53,8 +54,10 @@ export type GraphEdge = {
 };
 
 export type GraphCluster = {
+  id: number;
   name: string;
-  members?: string[];
+  members: string[];
+  location?: string;
 };
 
 export type GraphInfo = {

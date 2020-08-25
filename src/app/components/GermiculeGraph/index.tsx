@@ -14,6 +14,7 @@ import {
   GraphNode,
   GraphEdge,
   GraphCluster,
+  GermiculeCluster,
 } from '../../types';
 
 export type Props = {
@@ -26,18 +27,36 @@ function getNextUnknown() {
   return UNKNOWN_COUNT++;
 }
 
-const BACKGROUND_COLOR = '#fdf6e3'; /* base3 */
+let CLUSTER_COUNT: number = 0;
+const CLUSTERS_SEEN = new Map<string, number>();
+function getClusterId(name: string) {
+  if (!CLUSTERS_SEEN.has(name)) {
+    CLUSTERS_SEEN.set(name, CLUSTER_COUNT++);
+  }
+  return CLUSTERS_SEEN.get(name);
+}
+
+const COLORS = {
+  background: '#fdf6e3',
+  risks: {
+    0: '#859900' /* green */,
+    1: '#2aa198' /* cyan */,
+    2: '#268bd2' /* blue */,
+    3: '#6c71c4' /* violet */,
+    4: '#d33682' /* magenta */,
+    5: '#dc322f' /* red */,
+  },
+}; /* base3 */
+
+const MAX_RISK: number = Object.keys(COLORS.risks).length;
 
 const SYMBOL_SIZE = 30;
-const CATEGORY_INFO = [
-  { name: '0', itemStyle: { color: '#859900' /* green */ } },
-  { name: '1', itemStyle: { color: '#2aa198' /* cyan */ } },
-  { name: '2', itemStyle: { color: '#268bd2' /* blue */ } },
-  { name: '3', itemStyle: { color: '#6c71c4' /* violet */ } },
-  { name: '4', itemStyle: { color: '#d33682' /* magenta */ } },
-  { name: '5', itemStyle: { color: '#dc322f' /* red */ } },
-  { name: 'unknown', itemStyle: { color: BACKGROUND_COLOR } },
-];
+const DEFAULT_CATEGORY = 'unknown';
+const DEFAULT_CATEGORY_INFO = {
+  name: DEFAULT_CATEGORY,
+  members: [],
+  id: getClusterId(DEFAULT_CATEGORY),
+} as GraphCluster;
 
 const UNKNOWN_LABEL: string = '❓';
 
@@ -45,7 +64,7 @@ const DEFAULT_NODE: Partial<GraphNode> = {
   name: UNKNOWN_LABEL,
   _label: UNKNOWN_LABEL,
   symbolSize: SYMBOL_SIZE,
-  category: CATEGORY_INFO.length - 1,
+  category: 0,
 };
 
 function toNode(item: GermiculeItem): GraphNode {
@@ -65,11 +84,17 @@ function toNode(item: GermiculeItem): GraphNode {
     name: item.name,
     _label: item.name,
   };
-  if (item.risk) {
+  if (item.risk && Math.ceil(item.risk) < MAX_RISK) {
     result.value = item.risk;
     result._tooltip = String(item.risk);
-    result.category = Math.ceil(item.risk);
     result.symbolSize = SYMBOL_SIZE * (1 + (5 - item.risk) / 5);
+    result.itemStyle = {
+      color: COLORS.risks[Math.ceil(item.risk)],
+    };
+  } else {
+    result.itemStyle = {
+      color: COLORS.background,
+    };
   }
   return result;
 }
@@ -115,7 +140,6 @@ export function buildGraph(members: Array<GermiculeItem>): GraphInfo {
         return accumulator;
       }
       const node: GraphNode = toNode(member);
-      accumulator.nodes.push(node);
       accumulator.partialEdges!.push(
         toPartialEdge(member, node.name) as GraphEdge,
       );
@@ -142,34 +166,38 @@ export function buildGraph(members: Array<GermiculeItem>): GraphInfo {
         });
       }
       if (member && 'cluster' in member) {
-        if (accumulator.clusters!.has(member.cluster!)) {
-          const cluster: GraphCluster = accumulator.clusters!.get(
-            member.cluster!,
-          )!;
-          if ('members' in cluster) {
-            cluster.members!.forEach(clusterMember => {
-              accumulator.edges!.push({
-                ...DEFAULT_CLUSTER_EDGE,
-                source: node.name,
-                target: clusterMember,
-              });
-            });
-            cluster.members!.push(node.name);
-          }
-        } else {
+        if (!accumulator.clusters!.has(member.cluster!)) {
           accumulator.clusters!.set(member.cluster!, {
             name: member.cluster,
-            members: [node.name],
+            members: [],
+            id: getClusterId(member.cluster!),
           } as GraphCluster);
         }
+        const cluster: GraphCluster = accumulator.clusters!.get(
+          member.cluster!,
+        )!;
+        if ('members' in cluster) {
+          cluster.members!.forEach(clusterMember => {
+            accumulator.edges!.push({
+              ...DEFAULT_CLUSTER_EDGE,
+              source: node.name,
+              target: clusterMember,
+            });
+          });
+          cluster.members!.push(node.name);
+        }
+        node.category = cluster.id;
       }
+      accumulator.nodes.push(node);
       return accumulator;
     },
     {
       nodes: [],
       edges: [],
       partialEdges: [],
-      clusters: new Map<string, GraphCluster>(),
+      clusters: new Map<string, GraphCluster>([
+        [DEFAULT_CATEGORY_INFO.name, DEFAULT_CATEGORY_INFO],
+      ]),
     } as GraphInfo,
   );
 }
@@ -188,26 +216,43 @@ export class GermiculeGraph extends React.Component<Props> {
         ? buildGraph(this.props.data.germicules)
         : DEFAULT_GRAPH_INFO;
     // console.log('graphInfo', graphInfo);
-    // const categoryNames =
-    //   'categories' in graphInfo
-    //     ? graphInfo.categories!.map((category: GraphCategory) => category.name)
-    //     : [];
+
+    if (this.props.data && 'clusters' in this.props.data) {
+      this.props.data.clusters?.forEach((cluster: GermiculeCluster) => {
+        if (!graphInfo.clusters) {
+          graphInfo.clusters = new Map<string, GraphCluster>([
+            [DEFAULT_CATEGORY_INFO.name, DEFAULT_CATEGORY_INFO],
+          ]);
+        }
+        if (!graphInfo.clusters.has(cluster.name)) {
+          graphInfo.clusters.set(cluster.name, {
+            ...cluster,
+            id: getClusterId(cluster.name),
+          } as GraphCluster);
+        } else {
+          graphInfo.clusters.set(cluster.name, {
+            ...cluster,
+            ...graphInfo.clusters.get(cluster.name),
+          } as GraphCluster);
+        }
+      });
+    }
+    const categories = Array.from(graphInfo.clusters!.values());
+    // console.log(categories);
     return {
-      legend: {
-        // data: categoryNames,
-      },
+      legend: {},
       tooltip: {
         show: true,
         formatter: params => params.data._tooltip,
         position: 'bottom',
       },
-      backgroundColor: BACKGROUND_COLOR,
+      backgroundColor: COLORS.background,
       series: [
         {
           type: 'graph',
           layout: 'force',
           animation: true,
-          categories: CATEGORY_INFO,
+          categories,
           label: {
             show: true,
             position: 'inside',
