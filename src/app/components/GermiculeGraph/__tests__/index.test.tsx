@@ -1,23 +1,18 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import echarts from 'echarts';
-import { GermiculeGraph, buildGraph } from '..';
+import { GermiculeGraph, toGraphInfo } from '..';
 
 import { GermiculeItem, GraphInfo } from '../../../types';
 
 const emptyGermicule: GermiculeItem[] = [];
-const emptyGraphInfo: GraphInfo = {
-  nodes: [],
+const emptyGraphInfo: Partial<GraphInfo> = {
+  nodes: [{ name: '❓', _label: '❓', category: 0 }],
 };
 
-const unknownGermicule: GermiculeItem[] = [null as GermiculeItem];
-const unknownGraphInfo: GraphInfo = {
-  nodes: [
-    {
-      name: 'unknown 0',
-      _label: '❓',
-    },
-  ],
+const unknownGermicule: GermiculeItem[] = [null];
+const unknownGraphInfo: Partial<GraphInfo> = {
+  nodes: [],
 };
 
 const lonelyGermicule: GermiculeItem[] = [
@@ -26,7 +21,7 @@ const lonelyGermicule: GermiculeItem[] = [
     risk: 5,
   } as GermiculeItem,
 ];
-const lonelyGraphInfo: GraphInfo = {
+const lonelyGraphInfo: Partial<GraphInfo> = {
   nodes: [
     {
       name: '🦄',
@@ -50,7 +45,7 @@ const twinGermicule: GermiculeItem[] = [
     ],
   },
 ] as GermiculeItem[];
-const twinGraphInfo: GraphInfo = {
+const twinGraphInfo: Partial<GraphInfo> = {
   nodes: [
     { name: '🌏', _label: '🌏', value: 2 },
     { name: '🌞', _label: '🌞', value: 3 },
@@ -88,7 +83,7 @@ const linkGermicule: GermiculeItem[] = [
     ],
   },
 ];
-const linkGraphInfo: GraphInfo = {
+const linkGraphInfo: Partial<GraphInfo> = {
   nodes: [
     { name: '🌚', _label: '🌚' },
     { name: '🌏', _label: '🌏' },
@@ -113,7 +108,7 @@ const clusterGermicule: GermiculeItem[] = [
     ],
   },
 ] as GermiculeItem[];
-const clusterGraphInfo: GraphInfo = {
+const clusterGraphInfo: Partial<GraphInfo> = {
   nodes: [
     { name: '🔴', category: 1 },
     { name: '🔵', category: 1 },
@@ -124,10 +119,10 @@ const clusterGraphInfo: GraphInfo = {
   edges: [
     { source: '🔵', target: '🔴' },
     { source: '🎌', target: '⛳' },
-    { target: '🔴', source: '🏳️‍🌈' },
-    { target: '🔵', source: '🏳️‍🌈' },
-    { target: '⛳', source: '🏳️‍🌈' },
     { target: '🎌', source: '🏳️‍🌈' },
+    { target: '⛳', source: '🏳️‍🌈' },
+    { target: '🔵', source: '🏳️‍🌈' },
+    { target: '🔴', source: '🏳️‍🌈' },
     { source: '🏳️‍🌈', target: '⛳' },
     { source: '🏳️‍🌈', target: '🎌' },
   ],
@@ -164,27 +159,27 @@ describe('<GermiculeGraph  />', () => {
 
 describe('deconstructGermicule', () => {
   it('should handle empty germicule data', () => {
-    const result = buildGraph(emptyGermicule);
+    const result = toGraphInfo({ germicules: emptyGermicule });
     expect(result).toMatchObject(emptyGraphInfo);
   });
   it('should handle unknown germicule data', () => {
-    const result = buildGraph(unknownGermicule);
+    const result = toGraphInfo({ germicules: unknownGermicule });
     expect(result).toMatchObject(unknownGraphInfo);
   });
   it('should handle lonely germicule data', () => {
-    const result = buildGraph(lonelyGermicule);
+    const result = toGraphInfo({ germicules: lonelyGermicule });
     expect(result).toMatchObject(lonelyGraphInfo);
   });
   it('should handle twin germicule data', () => {
-    const result = buildGraph(twinGermicule);
+    const result = toGraphInfo({ germicules: twinGermicule });
     expect(result).toMatchObject(twinGraphInfo);
   });
   it('should handle link germicule data', () => {
-    const result = buildGraph(linkGermicule);
+    const result = toGraphInfo({ germicules: linkGermicule });
     expect(result).toMatchObject(linkGraphInfo);
   });
   it('should handle cluster germicule data', () => {
-    const result = buildGraph(clusterGermicule);
+    const result = toGraphInfo({ germicules: clusterGermicule });
     expect(result).toMatchObject(clusterGraphInfo);
   });
 });

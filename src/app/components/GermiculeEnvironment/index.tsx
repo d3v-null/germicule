@@ -8,7 +8,7 @@
 import React from 'react';
 import { GermiculeGraph } from '../../components/GermiculeGraph';
 import { GermiculeEditor } from '../../components/GermiculeEditor';
-import { GermiculeMeta } from '../../types';
+import { GermiculeMeta, GermiculeCluster } from '../../types';
 import SplitterLayout from 'react-splitter-layout';
 import 'react-splitter-layout/lib/index.css';
 
@@ -26,7 +26,7 @@ interface State {
 
 const DEFAULT_SRC = {
   version: '0.2',
-  clusters: [{ name: 'cluster' }],
+  clusters: [{ name: 'cluster', members: [] } as GermiculeCluster],
   germicules: [{ name: '❓', cluster: 'cluster' }],
 } as GermiculeMeta;
 

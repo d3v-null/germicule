@@ -62,7 +62,7 @@ export type GraphCluster = {
 
 export type GraphInfo = {
   nodes: GraphNode[];
-  edges?: GraphEdge[];
-  partialEdges?: Partial<GraphEdge[]>;
-  clusters?: Map<string, GraphCluster>;
+  edges: GraphEdge[];
+  partialEdges: Partial<GraphEdge[]>;
+  clusters: Map<string, GraphCluster>;
 };

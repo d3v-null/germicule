@@ -52,7 +52,7 @@ const MAX_RISK: number = Object.keys(COLORS.risks).length;
 
 const SYMBOL_SIZE = 30;
 const DEFAULT_CATEGORY = 'unknown';
-const DEFAULT_CATEGORY_INFO = {
+export const DEFAULT_CATEGORY_INFO = {
   name: DEFAULT_CATEGORY,
   members: [],
   id: getClusterId(DEFAULT_CATEGORY),
@@ -64,7 +64,10 @@ const DEFAULT_NODE: Partial<GraphNode> = {
   name: UNKNOWN_LABEL,
   _label: UNKNOWN_LABEL,
   symbolSize: SYMBOL_SIZE,
-  category: 0,
+  category: DEFAULT_CATEGORY_INFO.id,
+  itemStyle: {
+    color: COLORS.background,
+  },
 };
 
 function toNode(item: GermiculeItem): GraphNode {
@@ -90,10 +93,6 @@ function toNode(item: GermiculeItem): GraphNode {
     result.symbolSize = SYMBOL_SIZE * (1 + (5 - item.risk) / 5);
     result.itemStyle = {
       color: COLORS.risks[Math.ceil(item.risk)],
-    };
-  } else {
-    result.itemStyle = {
-      color: COLORS.background,
     };
   }
   return result;
@@ -130,113 +129,98 @@ function toPartialEdge(
   return result;
 }
 
-export function buildGraph(members: Array<GermiculeItem>): GraphInfo {
-  return members.reduce(
-    (accumulator: GraphInfo, member: GermiculeItem): GraphInfo => {
-      if (member && 'link' in member) {
-        accumulator.partialEdges!.push(
-          toPartialEdge(member, member.link) as GraphEdge,
-        );
-        return accumulator;
+export function buildGraph(
+  members: Array<GermiculeItem>,
+  accumulator: GraphInfo,
+): void {
+  const parentPartialEdges: Partial<GraphEdge[]> = [];
+  members.forEach((member: GermiculeItem) => {
+    if (!member) return;
+    if ('link' in member) {
+      parentPartialEdges.push(toPartialEdge(member, member.link) as GraphEdge);
+      return;
+    }
+    if ('germicule' in member) {
+      buildGraph(member.germicule, accumulator);
+    }
+    const node: GraphNode = toNode(member);
+    while (accumulator.partialEdges.length) {
+      const partialEdge = accumulator.partialEdges.pop();
+      accumulator.edges.push({
+        ...partialEdge,
+        source: node.name,
+      } as GraphEdge);
+    }
+    if ('cluster' in member) {
+      if (!accumulator.clusters.has(member.cluster!)) {
+        accumulator.clusters.set(member.cluster!, {
+          name: member.cluster,
+          members: [],
+          id: getClusterId(member.cluster!),
+        } as GraphCluster);
       }
-      const node: GraphNode = toNode(member);
-      accumulator.partialEdges!.push(
-        toPartialEdge(member, node.name) as GraphEdge,
-      );
-      if (member && 'germicule' in member) {
-        const childGraph = buildGraph(member!.germicule);
-        // console.log(`childGraph: ${JSON.stringify(childGraph)}`);
-        accumulator.nodes.push(...childGraph.nodes);
-        accumulator.edges!.push(...childGraph.edges!);
-        if ('partialEdges' in childGraph) {
-          childGraph.partialEdges!.forEach(partialChildEdge => {
-            accumulator.edges!.push({
-              ...partialChildEdge,
-              source: node.name,
-            } as GraphEdge);
-          });
-        }
-        childGraph.clusters?.forEach((childCluster, childClusterName) => {
-          if (accumulator.clusters!.has(childClusterName)) {
-            const cluster = accumulator.clusters!.get(childClusterName)!;
-            cluster.members!.push(...childCluster.members!);
-          } else {
-            accumulator.clusters!.set(childClusterName, childCluster);
-          }
+      const cluster: GraphCluster = accumulator.clusters.get(member.cluster!)!;
+      if (cluster.members === undefined) {
+        cluster.members = [];
+      }
+      cluster.members!.forEach(clusterMember => {
+        accumulator.edges.push({
+          ...DEFAULT_CLUSTER_EDGE,
+          source: node.name,
+          target: clusterMember,
         });
-      }
-      if (member && 'cluster' in member) {
-        if (!accumulator.clusters!.has(member.cluster!)) {
-          accumulator.clusters!.set(member.cluster!, {
-            name: member.cluster,
-            members: [],
-            id: getClusterId(member.cluster!),
-          } as GraphCluster);
-        }
-        const cluster: GraphCluster = accumulator.clusters!.get(
-          member.cluster!,
-        )!;
-        if ('members' in cluster) {
-          cluster.members!.forEach(clusterMember => {
-            accumulator.edges!.push({
-              ...DEFAULT_CLUSTER_EDGE,
-              source: node.name,
-              target: clusterMember,
-            });
-          });
-          cluster.members!.push(node.name);
-        }
-        node.category = cluster.id;
-      }
-      accumulator.nodes.push(node);
-      return accumulator;
-    },
-    {
-      nodes: [],
-      edges: [],
-      partialEdges: [],
-      clusters: new Map<string, GraphCluster>([
-        [DEFAULT_CATEGORY_INFO.name, DEFAULT_CATEGORY_INFO],
-      ]),
-    } as GraphInfo,
-  );
+      });
+      cluster.members!.push(node.name);
+      node.category = cluster.id;
+    }
+    parentPartialEdges.push(toPartialEdge(member, node.name) as GraphEdge);
+    accumulator.nodes.push(node);
+  });
+  accumulator.partialEdges.push(...parentPartialEdges);
 }
 
-const DEFAULT_GRAPH_INFO: GraphInfo = {
-  nodes: [{ ...DEFAULT_NODE, _tooltip: 'your germicule is empty' }],
-} as GraphInfo;
+export function getAccumulator(data?: GermiculeMeta): GraphInfo {
+  const result: GraphInfo = {
+    nodes: [],
+    edges: [],
+    partialEdges: [],
+    clusters: new Map<string, GraphCluster>([
+      [DEFAULT_CATEGORY_INFO.name, DEFAULT_CATEGORY_INFO],
+    ]),
+  };
+  if (!data || data.germicules.length === 0) {
+    result.nodes.push({
+      ...DEFAULT_NODE,
+      _tooltip: 'your germicule is empty',
+    } as GraphNode);
+    return result;
+  }
+  if ('clusters' in data) {
+    data.clusters?.forEach((cluster: GermiculeCluster) => {
+      result.clusters!.set(cluster.name, {
+        ...cluster,
+        id: getClusterId(cluster.name),
+      } as GraphCluster);
+    });
+  }
+  return result;
+}
+
+export function toGraphInfo(data: GermiculeMeta): GraphInfo {
+  const accumulator = getAccumulator(data);
+  if (data && 'germicules' in data) {
+    buildGraph(data.germicules, accumulator);
+  }
+  // console.log('accumulator', accumulator);
+  return accumulator;
+}
 
 export class GermiculeGraph extends React.Component<Props> {
   // const { t, i18n } = useTranslation();
   // {t('')}
 
   getOption() {
-    const graphInfo: GraphInfo =
-      this.props.data && 'germicules' in this.props.data
-        ? buildGraph(this.props.data.germicules)
-        : DEFAULT_GRAPH_INFO;
-    // console.log('graphInfo', graphInfo);
-
-    if (this.props.data && 'clusters' in this.props.data) {
-      this.props.data.clusters?.forEach((cluster: GermiculeCluster) => {
-        if (!graphInfo.clusters) {
-          graphInfo.clusters = new Map<string, GraphCluster>([
-            [DEFAULT_CATEGORY_INFO.name, DEFAULT_CATEGORY_INFO],
-          ]);
-        }
-        if (!graphInfo.clusters.has(cluster.name)) {
-          graphInfo.clusters.set(cluster.name, {
-            ...cluster,
-            id: getClusterId(cluster.name),
-          } as GraphCluster);
-        } else {
-          graphInfo.clusters.set(cluster.name, {
-            ...cluster,
-            ...graphInfo.clusters.get(cluster.name),
-          } as GraphCluster);
-        }
-      });
-    }
+    const graphInfo = toGraphInfo(this.props.data);
     const categories = Array.from(graphInfo.clusters!.values());
     // console.log(categories);
     return {
@@ -267,7 +251,6 @@ export class GermiculeGraph extends React.Component<Props> {
           roam: true,
           draggable: true,
           nodes: graphInfo.nodes,
-          // categories: graphInfo.categories,
           force: {
             edgeLength: 150,
             repulsion: 500,
