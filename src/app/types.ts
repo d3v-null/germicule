@@ -66,3 +66,8 @@ export type GraphInfo = {
   partialEdges: Partial<GraphEdge[]>;
   clusters: Map<string, GraphCluster>;
 };
+
+export type GraphColorDef = {
+  background: string;
+  risks: Map<number, string>;
+};
