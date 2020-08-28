@@ -108,14 +108,19 @@
       "!src/**/*/Loadable.{js,jsx,ts,tsx}",
       "!src/**/*/types.ts",
       "!src/index.tsx",
-      "!src/serviceWorker.ts"
+      "!src/serviceWorker.ts",
+      "!src/app/components/NotFoundPage/**",
+      "!src/app/containers/HomePage/**",
+      "!src/utils/redux-injectors.ts",
+      "!src/utils/loadable.tsx",
+      "!src/locales/**"
     ],
     "coverageThreshold": {
       "global": {
-        "branches": 50,
-        "functions": 50,
-        "lines": 50,
-        "statements": 50
+        "branches": 70,
+        "functions": 70,
+        "lines": 70,
+        "statements": 70
       }
     }
   }
