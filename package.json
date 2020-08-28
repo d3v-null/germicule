@@ -60,7 +60,7 @@
     "start": "serve -s build -l ${PORT:-8080}",
     "build": "react-scripts build",
     "test": "react-scripts test --testPathIgnorePatterns=$'src/.*\\.data\\.[jt]sx?'",
-    "eject": "react-scripts eject",
+    "coverage": "react-scripts test --coverage --watchAll=false --testPathIgnorePatterns=$'src/.*\\.data\\.[jt]sx?'",
     "test:generators": "ts-node --project=./internals/ts-node.tsconfig.json ./internals/testing/test-generators.ts",
     "start:prod": "yarn build && serve -s build",
     "start:local": "react-scripts start",
@@ -112,10 +112,10 @@
     ],
     "coverageThreshold": {
       "global": {
-        "branches": 90,
-        "functions": 90,
-        "lines": 90,
-        "statements": 90
+        "branches": 50,
+        "functions": 50,
+        "lines": 50,
+        "statements": 50
       }
     }
   }

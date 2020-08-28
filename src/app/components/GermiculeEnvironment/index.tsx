@@ -24,18 +24,20 @@ interface State {
   splitterSize: number;
 }
 
-const DEFAULT_SRC = {
-  version: '0.2',
-  clusters: [{ name: 'cluster', members: [] } as GermiculeCluster],
-  germicules: [{ name: '❓', cluster: 'cluster' }],
-} as GermiculeMeta;
-
 const SIZING = {
   graphMinWidth: 300,
   graphMinHeight: 300,
   editorMinWidth: 300,
   editorMinHeight: 300,
 };
+
+export const DEFAULT_SRC = {
+  version: '0.2',
+  clusters: [{ name: 'cluster', members: [] } as GermiculeCluster],
+  germicules: [{ name: '❓', cluster: 'cluster' }],
+} as GermiculeMeta;
+
+export function DEFAULT_ON_UPDATE_SRC(params: { src: object }): void {}
 
 const DEFAULT_STATE = {
   src: DEFAULT_SRC,

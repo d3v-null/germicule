@@ -1,6 +1,7 @@
 # Germicule
 
 ![Node.js CI](https://github.com/derwentx/germicule/workflows/Node.js%20CI/badge.svg)
+[![codecov](https://codecov.io/gh/derwentx/germicule/branch/master/graph/badge.svg)](https://codecov.io/gh/derwentx/germicule)
 
 React web app for visualising your contacts and their covid risk factors
 
