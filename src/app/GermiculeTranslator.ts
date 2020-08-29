@@ -69,6 +69,17 @@ export abstract class GermiculeTranslator<
     return this.clustersSeen.get(name);
   }
 
+  nodeCount: number = 0;
+  nodesSeen = new Map<string, number>();
+
+  getNodeId(name: string) {
+    if (!this.nodesSeen.has(name)) {
+      this.nodesSeen.set(name, this.nodeCount++);
+      return this.nodeCount;
+    }
+    return this.nodesSeen.get(name);
+  }
+
   getDefaultNode(): Partial<GraphNode> {
     throw new Error(`getDefaultNode(): Partial<GraphNode> not implemented`);
   }
@@ -94,7 +105,7 @@ export abstract class GermiculeTranslator<
     );
   }
 
-  setNodeClusterID(node: GraphNode, clusterID: number): void {
+  setNodeClusterIndex(node: GraphNode, clusterIndex: number): void {
     throw new Error(
       'getNodeIdentifier(node: GraphNode): string not implemented',
     );
@@ -162,11 +173,12 @@ export abstract class GermiculeTranslator<
           } as GraphEdge);
         });
         cluster.members!.push(this.getNodeIdentifier(node));
-        this.setNodeClusterID(node, cluster.id);
+        this.setNodeClusterIndex(node, cluster.id);
       }
       parentPartialEdges.push(
         this.toPartialEdge(member, this.getNodeIdentifier(node)) as GraphEdge,
       );
+      node.index = this.getNodeId(this.getNodeIdentifier(node));
       accumulator.nodes.push(node);
     });
     accumulator.partialEdges.push(...parentPartialEdges);
@@ -207,8 +219,8 @@ export class GermiculeEChartTranslator extends GermiculeTranslator<
     return node.name;
   }
 
-  setNodeClusterID(node: EChartGraphNode, clusterID: number): void {
-    node.category = clusterID;
+  setNodeClusterIndex(node: EChartGraphNode, clusterIndex: number): void {
+    node.category = clusterIndex;
   }
 
   getDefaultNode(): Partial<EChartGraphNode> {
@@ -338,8 +350,8 @@ export class GermiculeD3Translator extends GermiculeTranslator<
     return node.id;
   }
 
-  setNodeClusterID(node: D3GraphNode, clusterID: number): void {
-    node.group = clusterID;
+  setNodeClusterIndex(node: D3GraphNode, clusterIndex: number): void {
+    node.group = clusterIndex;
   }
 
   toNode(item: GermiculeItem): D3GraphNode {

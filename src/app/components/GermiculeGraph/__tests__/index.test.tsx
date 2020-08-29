@@ -27,11 +27,14 @@ describe('<EChartGermiculeGraph  />', () => {
     expect(result.container.firstChild).toMatchSnapshot();
   });
 });
-// describe('<D3GermiculeGraph  />', () => {
-//   it('should match snapshot', () => {
-//     const result = render(
-//       <D3GermiculeGraph data={{ germicules: lonelyGermicule }} />,
-//     );
-//     expect(result.container.firstChild).toMatchSnapshot();
-//   });
-// });
+describe('<D3GermiculeGraph  />', () => {
+  it('should match snapshot', () => {
+    const result = render(
+      <D3GermiculeGraph
+        data={{ germicules: lonelyGermicule }}
+        size={{ width: 100, height: 100 }}
+      />,
+    );
+    expect(result.container.firstChild).toMatchSnapshot();
+  });
+});

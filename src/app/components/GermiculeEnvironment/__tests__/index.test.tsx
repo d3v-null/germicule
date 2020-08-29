@@ -20,8 +20,14 @@ afterAll(() => {
 });
 
 describe('<GermiculeEnvironment  />', () => {
-  it('should match snapshot', () => {
-    const loadingIndicator = render(<GermiculeEnvironment />);
+  it('should match snapshot for eChart', () => {
+    const loadingIndicator = render(
+      <GermiculeEnvironment graphBackend="eCharts" />,
+    );
+    expect(loadingIndicator.container.firstChild).toMatchSnapshot();
+  });
+  it('should match snapshot for D3', () => {
+    const loadingIndicator = render(<GermiculeEnvironment graphBackend="D3" />);
     expect(loadingIndicator.container.firstChild).toMatchSnapshot();
   });
 });

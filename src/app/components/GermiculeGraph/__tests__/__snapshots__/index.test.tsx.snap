@@ -1,5 +1,29 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`<D3GermiculeGraph  /> should match snapshot 1`] = `
+<div
+  id="germicule-graph-d3"
+  style="width: 100px; height: 100px;"
+>
+  <svg
+    height="100"
+    width="100"
+  >
+    <circle
+      r="30"
+      style="stroke: #FFFFFF; stroke-width: 1.5;"
+    />
+    <text
+      dx="0"
+      dy="0"
+      font-size="15"
+    >
+      🦄
+    </text>
+  </svg>
+</div>
+`;
+
 exports[`<EChartGermiculeGraph  /> should match snapshot 1`] = `
 <div
   class="echarts-for-react "

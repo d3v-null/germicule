@@ -10,6 +10,11 @@ export interface GraphNode extends BaseGraphNode {
   _tooltip?: string;
   value?: number;
   group?: number;
+  index?: number;
+  fx?: number | null;
+  fy?: number | null;
+  x?: number;
+  y?: number;
 }
 
 export interface GraphEdge extends BaseGraphEdge {

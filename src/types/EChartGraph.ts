@@ -1,6 +1,10 @@
-import { GraphInfo as BaseGraphInfo } from './Graph';
+import {
+  GraphInfo as BaseGraphInfo,
+  GraphEdge as BaseGraphEdge,
+  GraphNode as BaseGraphNode,
+} from './Graph';
 
-export type GraphNode = {
+export interface GraphNode extends BaseGraphNode {
   name: string;
   _label?: string;
   tooltip?: object;
@@ -11,7 +15,7 @@ export type GraphNode = {
   itemStyle?: object;
 };
 
-export type GraphEdge = {
+export interface GraphEdge extends BaseGraphEdge {
   source: string;
   target: string;
   value?: number;

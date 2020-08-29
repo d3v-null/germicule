@@ -1,4 +1,6 @@
-export type GraphNode = {};
+export type GraphNode = {
+  index?: number;
+};
 
 export type GraphEdge = {
   source: any;

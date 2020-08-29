@@ -18,6 +18,7 @@ import * as _ from 'lodash';
 
 interface Props {
   src?: object;
+  graphBackend?: string;
 }
 
 interface State {
@@ -51,7 +52,7 @@ const DEFAULT_STATE = {
   splitterSize: 4,
   splitterPrimaryMin: SIZING.graphMinWidth,
   splitterSecondaryMin: SIZING.editorMinWidth,
-  graphBackend: 'eCharts',
+  graphBackend: 'D3',
   graphSize: {
     width: 800,
     height: 400,
