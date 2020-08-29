@@ -32,41 +32,6 @@ export type GermiculeMeta = {
   germicules: GermiculeItem[];
 };
 
-export type GraphNode = {
-  name: string;
-  _label?: string;
-  tooltip?: object;
-  _tooltip?: string;
-  value?: number;
-  symbolSize?: number;
-  category?: number;
-  itemStyle?: object;
-};
-
-export type GraphEdge = {
-  source: string;
-  target: string;
-  value?: number;
-  label?: object;
-  _label?: string;
-  _tooltip?: string;
-  lineStyle?: object;
-};
-
-export type GraphCluster = {
-  id: number;
-  name: string;
-  members: string[];
-  location?: string;
-};
-
-export type GraphInfo = {
-  nodes: GraphNode[];
-  edges: GraphEdge[];
-  partialEdges: Partial<GraphEdge[]>;
-  clusters: Map<string, GraphCluster>;
-};
-
 export type GraphColorDef = {
   background: string;
   risks: Map<number, string>;

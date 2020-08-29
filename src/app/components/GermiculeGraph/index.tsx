@@ -6,25 +6,17 @@
 import React from 'react';
 // import { useTranslation } from 'react-i18next';
 import ReactEcharts from 'echarts-for-react';
-import { GermiculeMeta } from '../../types';
-import { GermiculeTranslator } from 'app/GermiculeTranslator';
+import { GermiculeMeta } from '../../../types/GermiculeGraph';
+import {
+  GermiculeEChartTranslator as GermiculeTranslator,
+  // GermiculeD3Translator,
+  DEFAULT_COLORS,
+} from 'app/GermiculeTranslator';
 
 export type Props = {
   data: GermiculeMeta;
   style?: object;
 };
-
-export const COLORS = {
-  background: '#fdf6e3',
-  risks: new Map<number, string>([
-    [0, '#859900'] /* green */,
-    [1, '#2aa198'] /* cyan */,
-    [2, '#268bd2'] /* blue */,
-    [3, '#6c71c4'] /* violet */,
-    [4, '#d33682'] /* magenta */,
-    [5, '#dc322f'] /* red */,
-  ]),
-}; /* base3 */
 
 export class GermiculeGraph extends React.Component<Props> {
   translator: GermiculeTranslator;

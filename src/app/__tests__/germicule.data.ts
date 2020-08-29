@@ -1,29 +1,34 @@
-import { GermiculeItem, GraphInfo } from '../types';
+import { GermiculeItem } from '../../types/GermiculeGraph';
+import { GraphInfo as EChartGraphInfo } from '../../types/EChartGraph';
+import {
+  GraphInfo as D3GraphInfo,
+  GraphEdge as D3GraphEdge,
+} from '../../types/D3Graph';
 
 export const emptyGermicule: GermiculeItem[] = [];
-export const emptyGraphInfo: Partial<GraphInfo> = {
+export const emptyEChartGraphInfo: Partial<EChartGraphInfo> = {
   nodes: [{ name: '❓', _label: '❓', category: 0 }],
+};
+export const emptyD3GraphInfo: Partial<D3GraphInfo> = {
+  nodes: [{ id: '❓', group: 0 }],
 };
 
 export const unknownGermicule: GermiculeItem[] = [null];
-export const unknownGraphInfo: Partial<GraphInfo> = {
+export const unknownEChartGraphInfo: Partial<EChartGraphInfo> = {
+  nodes: [],
+};
+export const unknownD3GraphInfo: Partial<D3GraphInfo> = {
   nodes: [],
 };
 
 export const lonelyGermicule: GermiculeItem[] = [
-  {
-    name: '🦄',
-    risk: 5,
-  } as GermiculeItem,
+  { name: '🦄', risk: 5 } as GermiculeItem,
 ];
-export const lonelyGraphInfo: Partial<GraphInfo> = {
-  nodes: [
-    {
-      name: '🦄',
-      _label: '🦄',
-      value: 5,
-    },
-  ],
+export const lonelyEChartGraphInfo: Partial<EChartGraphInfo> = {
+  nodes: [{ name: '🦄', _label: '🦄', value: 5 }],
+};
+export const lonelyD3GraphInfo: Partial<D3GraphInfo> = {
+  nodes: [{ id: '🦄', group: 0, value: 5 }],
 };
 
 export const twinGermicule: GermiculeItem[] = [
@@ -40,7 +45,7 @@ export const twinGermicule: GermiculeItem[] = [
     ],
   },
 ] as GermiculeItem[];
-export const twinGraphInfo: Partial<GraphInfo> = {
+export const twinEChartGraphInfo: Partial<EChartGraphInfo> = {
   nodes: [
     { name: '🌏', _label: '🌏', value: 2 },
     { name: '🌞', _label: '🌞', value: 3 },
@@ -54,6 +59,13 @@ export const twinGraphInfo: Partial<GraphInfo> = {
     },
   ],
 };
+export const twinD3GraphInfo: Partial<D3GraphInfo> = {
+  nodes: [
+    { id: '🌏', group: 0, value: 2 },
+    { id: '🌞', group: 0, value: 3 },
+  ],
+  links: [{ source: '🌞', target: '🌏', value: 5 }],
+} as Partial<D3GraphInfo>;
 
 export const linkGermicule: GermiculeItem[] = [
   {
@@ -78,7 +90,7 @@ export const linkGermicule: GermiculeItem[] = [
     ],
   },
 ];
-export const linkGraphInfo: Partial<GraphInfo> = {
+export const linkEChartGraphInfo: Partial<EChartGraphInfo> = {
   nodes: [
     { name: '🌚', _label: '🌚' },
     { name: '🌏', _label: '🌏' },
@@ -104,7 +116,7 @@ export const clusterGermicule: GermiculeItem[] = [
   },
 ] as GermiculeItem[];
 
-export const clusterGraphInfo: Partial<GraphInfo> = {
+export const clusterEChartGraphInfo: Partial<EChartGraphInfo> = {
   nodes: [
     { name: '🔴', category: 1 },
     { name: '🔵', category: 1 },
@@ -127,4 +139,4 @@ export const clusterGraphInfo: Partial<GraphInfo> = {
     ['colors', { id: 1, name: 'colors', members: ['🔴', '🔵'] }],
     ['flags', { id: 2, name: 'flags', members: ['⛳', '🎌', '🏳️‍🌈'] }],
   ]),
-} as GraphInfo;
+} as EChartGraphInfo;
