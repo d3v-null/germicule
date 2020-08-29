@@ -21,6 +21,7 @@ interface State {
 export class D3GermiculeGraph extends React.Component<Props, State> {
   translator: GermiculeTranslator;
   mountPoint: Element | null;
+  svg: any;
   // simulation?: d3.Simulation<GraphNode, GraphEdge>;
 
   constructor(props: Props) {
@@ -69,16 +70,11 @@ export class D3GermiculeGraph extends React.Component<Props, State> {
       size: { width, height },
       graphInfo: { nodes, edges },
     } = this.state;
-    // const links = Array.from(edges.values());
-    const links = edges ? [] : [];
+    const links = Array.from(edges.values());
 
-    const svg = d3
-      .select(this.mountPoint)
-      .append('svg')
-      .attr('width', width)
-      .attr('height', height);
+    this.svg = d3.select(this.mountPoint).append('svg');
 
-    const link = svg
+    const link = this.svg
       .selectAll('line')
       .data(links)
       .enter()
@@ -88,14 +84,11 @@ export class D3GermiculeGraph extends React.Component<Props, State> {
       .attr('stroke-width', (d: GraphEdge) => Math.sqrt(d.value!));
     // .style('stroke-width', (d: any) => Math.sqrt(d.value));
 
-    const forceLink = d3.forceLink<GraphNode, GraphEdge>(links);
-    console.log('forceLink', forceLink);
-
     const simulation = d3
       .forceSimulation<GraphNode, GraphEdge>(nodes)
-      .force('charge', d3.forceManyBody())
-      .force('link', forceLink)
-      .force('center', d3.forceCenter());
+      .force('charge', d3.forceManyBody().strength(-300).distanceMax(200))
+      .force('link', d3.forceLink<GraphNode, GraphEdge>(links).strength(0.1))
+      .force('center', d3.forceCenter(width / 2, height / 2));
 
     simulation.on('tick', () => {
       link
@@ -104,12 +97,12 @@ export class D3GermiculeGraph extends React.Component<Props, State> {
         .attr('x2', (d: any) => d.target.x)
         .attr('y2', (d: any) => d.target.y);
 
-      node.attr('cx', (d: any) => d.x).attr('cy', (d: any) => d.y);
+      circle.attr('cx', (d: any) => d.x).attr('cy', (d: any) => d.y);
       text.attr('x', (d: any) => d.x).attr('y', (d: any) => d.y);
     });
 
     const dragStarted = (d: GraphNode) => {
-      if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+      if (!d3.event.active) simulation.alphaTarget(0.7).restart();
       d.fx = d.x;
       d.fy = d.y;
     };
@@ -125,31 +118,32 @@ export class D3GermiculeGraph extends React.Component<Props, State> {
       d.fy = null;
     };
 
-    const node = svg
+    const node = this.svg
       .selectAll('circle')
       .data(nodes)
       .enter()
-      .append<SVGCircleElement>('circle')
-      .attr('r', 30)
-      .style('stroke', '#FFFFFF')
-      .style('stroke-width', 1.5)
+      .append('g')
+      .attr('class', 'node')
       .call(
         d3
-          .drag<SVGCircleElement, GraphNode>()
+          .drag()
           .on('start', dragStarted)
           .on('drag', dragged)
           .on('end', dragEnded),
       );
 
-    const text = svg
-      .selectAll('text')
-      .data(nodes)
-      .enter()
+    const circle = node
+      .append('circle')
+      .attr('r', 30)
+      .style('stroke', '#FFFFFF')
+      .style('stroke-width', 1.5);
+
+    const text = node
       .append('text')
       .text(node => node.id)
       .attr('font-size', 15)
-      .attr('dx', 0)
-      .attr('dy', 0);
+      .attr('dx', -5)
+      .attr('dy', 5);
 
     // .style('fill', (d: any) => color(d.group))
     // .call(
@@ -158,10 +152,18 @@ export class D3GermiculeGraph extends React.Component<Props, State> {
     // );
   }
 
+  componentDidUpdate() {
+    const {
+      size: { width, height },
+      // graphInfo: { nodes, edges },
+    } = this.props;
+    this.svg.attr('width', width).attr('height', height);
+  }
+
   render() {
     const {
       size: { width, height },
-    } = this.state;
+    } = this.props;
     const sytle = {
       width,
       height,

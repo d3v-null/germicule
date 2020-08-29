@@ -5,21 +5,22 @@ exports[`<D3GermiculeGraph  /> should match snapshot 1`] = `
   id="germicule-graph-d3"
   style="width: 100px; height: 100px;"
 >
-  <svg
-    height="100"
-    width="100"
-  >
-    <circle
-      r="30"
-      style="stroke: #FFFFFF; stroke-width: 1.5;"
-    />
-    <text
-      dx="0"
-      dy="0"
-      font-size="15"
+  <svg>
+    <g
+      class="node"
     >
-      🦄
-    </text>
+      <circle
+        r="30"
+        style="stroke: #FFFFFF; stroke-width: 1.5;"
+      />
+      <text
+        dx="-5"
+        dy="5"
+        font-size="15"
+      >
+        🦄
+      </text>
+    </g>
   </svg>
 </div>
 `;

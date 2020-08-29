@@ -18,8 +18,6 @@ export interface GraphNode extends BaseGraphNode {
 }
 
 export interface GraphEdge extends BaseGraphEdge {
-  source: string;
-  target: string;
   _label?: string;
   _tooltip?: string;
   value?: number;

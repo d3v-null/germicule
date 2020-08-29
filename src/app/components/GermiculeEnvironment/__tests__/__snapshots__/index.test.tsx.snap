@@ -1539,17 +1539,25 @@ exports[`<GermiculeEnvironment  /> should match snapshot for D3 1`] = `
           height="400"
           width="800"
         >
-          <circle
-            r="30"
-            style="stroke: #FFFFFF; stroke-width: 1.5;"
+          <line
+            stroke-width="NaN"
+            style="stroke: #999999; stroke-opacity: 0.6;"
           />
-          <text
-            dx="0"
-            dy="0"
-            font-size="15"
+          <g
+            class="node"
           >
-            ❓
-          </text>
+            <circle
+              r="30"
+              style="stroke: #FFFFFF; stroke-width: 1.5;"
+            />
+            <text
+              dx="-5"
+              dy="5"
+              font-size="15"
+            >
+              ❓
+            </text>
+          </g>
         </svg>
       </div>
     </div>

@@ -422,4 +422,13 @@ export class GermiculeD3Translator extends GermiculeTranslator<
     }
     return result;
   }
+
+  toGraphInfo(data: GermiculeMeta): GraphInfo<D3GraphNode, D3GraphEdge> {
+    const accumulator = super.toGraphInfo(data);
+    accumulator.edges.forEach((edge: D3GraphEdge, key: string) => {
+      edge.source = this.getNodeId(edge.source);
+      edge.target = this.getNodeId(edge.target);
+    });
+    return accumulator;
+  }
 }
