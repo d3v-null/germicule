@@ -1,3 +1,10 @@
+export type GraphNode = {}
+
+export type GraphEdge = {
+  source: any;
+  target: any;
+};
+
 export type GraphCluster = {
   id: number;
   name: string;

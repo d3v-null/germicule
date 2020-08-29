@@ -1,4 +1,4 @@
-import { GermiculeItem } from '../../types/GermiculeGraph';
+import { GermiculeItem } from '../../types/Germicule';
 import { GraphInfo as EChartGraphInfo } from '../../types/EChartGraph';
 import {
   GraphInfo as D3GraphInfo,

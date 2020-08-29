@@ -32,7 +32,7 @@ export type GermiculeMeta = {
   germicules: GermiculeItem[];
 };
 
-export type GraphColorDef = {
+export type GraphThemeDef = {
   background: string;
   risks: Map<number, string>;
 };

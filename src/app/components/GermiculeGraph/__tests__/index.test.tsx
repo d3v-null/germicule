@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import echarts from 'echarts';
-import { GermiculeGraph } from '..';
+import { EChartGermiculeGraph, D3GermiculeGraph } from '..';
 import { lonelyGermicule } from '../../../__tests__/germicule.data';
 
 let spy: any;
@@ -19,11 +19,19 @@ afterAll(() => {
   spy.mockRestore();
 });
 
-describe('<GermiculeGraph  />', () => {
+describe('<EChartGermiculeGraph  />', () => {
   it('should match snapshot', () => {
-    const loadingIndicator = render(
-      <GermiculeGraph data={{ germicules: lonelyGermicule }} />,
+    const result = render(
+      <EChartGermiculeGraph data={{ germicules: lonelyGermicule }} />,
     );
-    expect(loadingIndicator.container.firstChild).toMatchSnapshot();
+    expect(result.container.firstChild).toMatchSnapshot();
   });
 });
+// describe('<D3GermiculeGraph  />', () => {
+//   it('should match snapshot', () => {
+//     const result = render(
+//       <D3GermiculeGraph data={{ germicules: lonelyGermicule }} />,
+//     );
+//     expect(result.container.firstChild).toMatchSnapshot();
+//   });
+// });

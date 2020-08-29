@@ -9,8 +9,8 @@ import {
   GermiculeMeta,
   GermiculeNode,
   GermiculeCluster,
-  GraphColorDef,
-} from '../types/GermiculeGraph';
+  GraphThemeDef,
+} from '../types/Germicule';
 import {
   GraphInfo as EChartGraphInfo,
   GraphNode as EChartGraphNode,
@@ -21,11 +21,15 @@ import {
   GraphNode as D3GraphNode,
   GraphEdge as D3GraphEdge,
 } from '../types/D3Graph';
-import { GraphCluster, GraphInfo } from '../types/Graph';
+import {
+  GraphCluster,
+  GraphInfo,
+  GraphEdge as BaseGraphEdge,
+} from '../types/Graph';
 
 export const defaultCategory = 'unknown';
 
-export const DEFAULT_COLORS: GraphColorDef = {
+export const DEFAULT_THEME: GraphThemeDef = {
   background: '#fdf6e3',
   risks: new Map<number, string>([
     [0, '#859900'] /* green */,
@@ -37,11 +41,14 @@ export const DEFAULT_COLORS: GraphColorDef = {
   ]),
 }; /* base3 */
 
-export abstract class GermiculeTranslator<GraphNode, GraphEdge> {
-  colors: GraphColorDef = DEFAULT_COLORS;
+export abstract class GermiculeTranslator<
+  GraphNode,
+  GraphEdge extends BaseGraphEdge
+> {
+  theme: GraphThemeDef = DEFAULT_THEME;
 
-  constructor(colors?: GraphColorDef) {
-    if (colors) this.colors = colors;
+  constructor(theme?: GraphThemeDef) {
+    if (theme) this.theme = theme;
   }
 
   unknownLabel: string = '❓';
@@ -86,14 +93,22 @@ export abstract class GermiculeTranslator<GraphNode, GraphEdge> {
     );
   }
 
-  setNodeClusterID(node: GraphNode, clusterID: number): GraphNode {
+  setNodeClusterID(node: GraphNode, clusterID: number): void {
     throw new Error(
       'getNodeIdentifier(node: GraphNode): string not implemented',
     );
   }
 
   isValidRisk(risk: number): boolean {
-    return Math.ceil(risk) < Array.from(this.colors.risks.keys()).length;
+    return Math.ceil(risk) < Array.from(this.theme.risks.keys()).length;
+  }
+
+  edgeExists(edges: GraphEdge[], source: string, target: string) {
+    edges.forEach((edge: GraphEdge) => {
+      if (edge.source === source && edge.target === target) return true;
+      if (edge.source === target && edge.target === source) return true;
+    });
+    return false;
   }
 
   buildGraph(
@@ -113,8 +128,14 @@ export abstract class GermiculeTranslator<GraphNode, GraphEdge> {
         this.buildGraph(member.germicule, accumulator);
       }
       const node: GraphNode = this.toNode(member);
+      const source = this.getNodeIdentifier(node);
       while (accumulator.partialEdges.length) {
         const partialEdge = accumulator.partialEdges.pop();
+        if (
+          partialEdge &&
+          this.edgeExists(accumulator.edges, source, partialEdge.target)
+        )
+          return;
         accumulator.edges.push({
           ...partialEdge,
           source: this.getNodeIdentifier(node),
@@ -135,11 +156,12 @@ export abstract class GermiculeTranslator<GraphNode, GraphEdge> {
           cluster.members = [];
         }
         cluster.members!.forEach(clusterMember => {
-          accumulator.edges.push({
+          if (this.edgeExists(accumulator.edges, source, clusterMember)) return;
+          accumulator.edges.push(({
             ...this.defaultClusterEdge,
             source: this.getNodeIdentifier(node),
             target: clusterMember,
-          } as unknown as GraphEdge);
+          } as unknown) as GraphEdge);
         });
         cluster.members!.push(this.getNodeIdentifier(node));
         this.setNodeClusterID(node, cluster.id);
@@ -163,6 +185,7 @@ export abstract class GermiculeTranslator<GraphNode, GraphEdge> {
     if (data && 'germicules' in data) {
       this.buildGraph(data.germicules, accumulator);
     }
+    // console.log('accumulator', accumulator);
     return accumulator;
   }
 }
@@ -173,8 +196,8 @@ export class GermiculeEChartTranslator extends GermiculeTranslator<
 > {
   symbolSize: number;
 
-  constructor(colors?: GraphColorDef, symbolSize?: number) {
-    super(colors);
+  constructor(theme?: GraphThemeDef, symbolSize?: number) {
+    super(theme);
     this.symbolSize = symbolSize ? symbolSize : 30;
     this.clustersSeen.set(
       this.defaultCategoryInfo.name,
@@ -186,9 +209,8 @@ export class GermiculeEChartTranslator extends GermiculeTranslator<
     return node.name;
   }
 
-  setNodeClusterID(node: EChartGraphNode, clusterID: number): EChartGraphNode {
+  setNodeClusterID(node: EChartGraphNode, clusterID: number): void {
     node.category = clusterID;
-    return node;
   }
 
   getDefaultNode(): Partial<EChartGraphNode> {
@@ -198,7 +220,7 @@ export class GermiculeEChartTranslator extends GermiculeTranslator<
       symbolSize: this.symbolSize,
       category: this.defaultCategoryInfo.id,
       itemStyle: {
-        color: this.colors.background,
+        color: this.theme.background,
       },
     };
   }
@@ -225,7 +247,7 @@ export class GermiculeEChartTranslator extends GermiculeTranslator<
       result._tooltip = String(item.risk);
       result.symbolSize = this.symbolSize * (1 + (5 - item.risk) / 5);
       result.itemStyle = {
-        color: this.colors.risks[Math.ceil(item.risk)],
+        color: this.theme.risks.get(Math.ceil(item.risk)),
       };
     }
     return result;
@@ -259,7 +281,7 @@ export class GermiculeEChartTranslator extends GermiculeTranslator<
     } else {
       result.label = { show: false };
     }
-    if (item && 'contact' in item) {
+    if (item && 'contact' in item && item.contact !== null) {
       result.value = item.contact;
     }
     return result;
@@ -297,8 +319,8 @@ export class GermiculeD3Translator extends GermiculeTranslator<
   D3GraphNode,
   D3GraphEdge
 > {
-  constructor(colors?: GraphColorDef, symbolSize?: number) {
-    super(colors);
+  constructor(theme?: GraphThemeDef, symbolSize?: number) {
+    super(theme);
   }
 
   defaultCategoryInfo: GraphCluster = {
@@ -316,6 +338,10 @@ export class GermiculeD3Translator extends GermiculeTranslator<
 
   getNodeIdentifier(node: D3GraphNode): string {
     return node.id;
+  }
+
+  setNodeClusterID(node: D3GraphNode, clusterID: number): void {
+    node.group = clusterID;
   }
 
   toNode(item: GermiculeItem): D3GraphNode {
@@ -340,7 +366,7 @@ export class GermiculeD3Translator extends GermiculeTranslator<
       result._tooltip = String(item.risk);
       // result.symbolSize = this.symbolSize * (1 + (5 - item.risk) / 5);
       // result.itemStyle = {
-      //   color: this.colors.risks[Math.ceil(item.risk)],
+      //   color: this.theme.risks[Math.ceil(item.risk)],
       // };
     }
     return result;
@@ -354,7 +380,7 @@ export class GermiculeD3Translator extends GermiculeTranslator<
     } else {
       // result.label = { show: false };
     }
-    if (item && 'contact' in item) {
+    if (item && 'contact' in item && item.contact !== null) {
       result.value = item.contact;
     }
     return result;
