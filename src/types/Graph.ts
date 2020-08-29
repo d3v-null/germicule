@@ -1,4 +1,4 @@
-export type GraphNode = {}
+export type GraphNode = {};
 
 export type GraphEdge = {
   source: any;
@@ -14,7 +14,7 @@ export type GraphCluster = {
 
 export type GraphInfo<GraphNode, GraphEdge> = {
   nodes: GraphNode[];
-  edges: GraphEdge[];
+  edges: Map<string, GraphEdge>;
   partialEdges: Partial<GraphEdge[]>;
   clusters: Map<string, GraphCluster>;
 };

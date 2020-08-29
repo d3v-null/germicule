@@ -25,6 +25,7 @@ import {
   GraphCluster,
   GraphInfo,
   GraphEdge as BaseGraphEdge,
+  GraphNode as BaseGraphNode,
 } from '../types/Graph';
 
 export const defaultCategory = 'unknown';
@@ -42,7 +43,7 @@ export const DEFAULT_THEME: GraphThemeDef = {
 }; /* base3 */
 
 export abstract class GermiculeTranslator<
-  GraphNode,
+  GraphNode extends BaseGraphNode,
   GraphEdge extends BaseGraphEdge
 > {
   theme: GraphThemeDef = DEFAULT_THEME;
@@ -103,12 +104,8 @@ export abstract class GermiculeTranslator<
     return Math.ceil(risk) < Array.from(this.theme.risks.keys()).length;
   }
 
-  edgeExists(edges: GraphEdge[], source: string, target: string) {
-    edges.forEach((edge: GraphEdge) => {
-      if (edge.source === source && edge.target === target) return true;
-      if (edge.source === target && edge.target === source) return true;
-    });
-    return false;
+  edgeName(source: string, target: string): string {
+    return `${source} > ${target}`;
   }
 
   buildGraph(
@@ -131,12 +128,12 @@ export abstract class GermiculeTranslator<
       const source = this.getNodeIdentifier(node);
       while (accumulator.partialEdges.length) {
         const partialEdge = accumulator.partialEdges.pop();
-        if (
-          partialEdge &&
-          this.edgeExists(accumulator.edges, source, partialEdge.target)
-        )
+        if (!partialEdge) return;
+        const edgeName = this.edgeName(source, partialEdge.target);
+        if (accumulator.edges.has(edgeName)) {
           return;
-        accumulator.edges.push({
+        }
+        accumulator.edges.set(edgeName, {
           ...partialEdge,
           source: this.getNodeIdentifier(node),
         } as GraphEdge);
@@ -156,12 +153,13 @@ export abstract class GermiculeTranslator<
           cluster.members = [];
         }
         cluster.members!.forEach(clusterMember => {
-          if (this.edgeExists(accumulator.edges, source, clusterMember)) return;
-          accumulator.edges.push(({
+          const edgeName = this.edgeName(source, clusterMember);
+          if (accumulator.edges.has(edgeName)) return;
+          accumulator.edges.set(edgeName, {
             ...this.defaultClusterEdge,
             source: this.getNodeIdentifier(node),
             target: clusterMember,
-          } as unknown) as GraphEdge);
+          } as GraphEdge);
         });
         cluster.members!.push(this.getNodeIdentifier(node));
         this.setNodeClusterID(node, cluster.id);
@@ -290,7 +288,7 @@ export class GermiculeEChartTranslator extends GermiculeTranslator<
   getAccumulator(data?: GermiculeMeta): EChartGraphInfo {
     const result: EChartGraphInfo = {
       nodes: [],
-      edges: [],
+      edges: new Map<string, EChartGraphEdge>(),
       partialEdges: [],
       clusters: new Map<string, GraphCluster>([
         [this.defaultCategoryInfo.name, this.defaultCategoryInfo],
@@ -389,7 +387,7 @@ export class GermiculeD3Translator extends GermiculeTranslator<
   getAccumulator(data?: GermiculeMeta): D3GraphInfo {
     const result: D3GraphInfo = {
       nodes: [],
-      edges: [],
+      edges: new Map<string, D3GraphEdge>(),
       partialEdges: [],
       clusters: new Map<string, GraphCluster>([
         [this.defaultCategoryInfo.name, this.defaultCategoryInfo],

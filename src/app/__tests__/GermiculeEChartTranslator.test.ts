@@ -53,20 +53,30 @@ describe('GermiculeEChartTranslator.toGraphInfo', () => {
       COLORS,
     );
     const result = translator.toGraphInfo({ germicules: twinGermicule });
-    expect(result).toMatchObject(twinEChartGraphInfo);
+    expect(result.nodes).toMatchObject(twinEChartGraphInfo.nodes!);
+    expect(Array.from(result.edges.values())).toMatchObject(
+      Array.from(twinEChartGraphInfo.edges!.values()),
+    );
   });
   it('should handle link germicule data', () => {
     const translator: GermiculeEChartTranslator = new GermiculeEChartTranslator(
       COLORS,
     );
     const result = translator.toGraphInfo({ germicules: linkGermicule });
-    expect(result).toMatchObject(linkEChartGraphInfo);
+    expect(result.nodes).toMatchObject(linkEChartGraphInfo.nodes!);
+    expect(Array.from(result.edges.values())).toMatchObject(
+      Array.from(linkEChartGraphInfo.edges!.values()),
+    );
   });
   it('should handle cluster germicule data', () => {
     const translator: GermiculeEChartTranslator = new GermiculeEChartTranslator(
       COLORS,
     );
     const result = translator.toGraphInfo({ germicules: clusterGermicule });
-    expect(result).toMatchObject(clusterEChartGraphInfo);
+    expect(result.nodes).toMatchObject(clusterEChartGraphInfo.nodes!);
+    expect(result.clusters).toMatchObject(clusterEChartGraphInfo.clusters!);
+    expect(Array.from(result.edges.values())).toMatchObject(
+      Array.from(clusterEChartGraphInfo.edges!.values()),
+    );
   });
 });

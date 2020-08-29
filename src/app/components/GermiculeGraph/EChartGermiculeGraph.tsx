@@ -32,7 +32,7 @@ export class EChartGermiculeGraph extends React.Component<Props, State> {
   getOptions() {
     const categories = Array.from(this.state.graphInfo.clusters!.values());
     // console.log(categories);
-    return {
+    const result = {
       legend: {},
       tooltip: {
         show: true,
@@ -66,10 +66,12 @@ export class EChartGermiculeGraph extends React.Component<Props, State> {
             repulsion: 500,
             gravity: 0.2,
           },
-          edges: this.state.graphInfo.edges,
+          edges: Array.from(this.state.graphInfo.edges.values()),
         },
       ],
     };
+    // console.log('options', result);
+    return result;
   }
 
   render() {

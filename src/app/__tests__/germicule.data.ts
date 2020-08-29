@@ -1,9 +1,9 @@
 import { GermiculeItem } from '../../types/Germicule';
-import { GraphInfo as EChartGraphInfo } from '../../types/EChartGraph';
 import {
-  GraphInfo as D3GraphInfo,
-  GraphEdge as D3GraphEdge,
-} from '../../types/D3Graph';
+  GraphInfo as EChartGraphInfo,
+  GraphEdge as EChartGraphEdge,
+} from '../../types/EChartGraph';
+import { GraphInfo as D3GraphInfo } from '../../types/D3Graph';
 
 export const emptyGermicule: GermiculeItem[] = [];
 export const emptyEChartGraphInfo: Partial<EChartGraphInfo> = {
@@ -50,14 +50,9 @@ export const twinEChartGraphInfo: Partial<EChartGraphInfo> = {
     { name: '🌏', _label: '🌏', value: 2 },
     { name: '🌞', _label: '🌞', value: 3 },
   ],
-  edges: [
-    {
-      source: '🌞',
-      target: '🌏',
-      value: 5,
-      _label: 'planet',
-    },
-  ],
+  edges: new Map<string, EChartGraphEdge>([
+    ['🌞 > 🌏', { source: '🌞', target: '🌏', value: 5, _label: 'planet' }],
+  ]),
 };
 export const twinD3GraphInfo: Partial<D3GraphInfo> = {
   nodes: [
@@ -96,11 +91,11 @@ export const linkEChartGraphInfo: Partial<EChartGraphInfo> = {
     { name: '🌏', _label: '🌏' },
     { name: '🌞', _label: '🌞' },
   ],
-  edges: [
-    { source: '🌚', target: '🌞' },
-    { source: '🌏', target: '🌚' },
-    { source: '🌞', target: '🌏' },
-  ],
+  edges: new Map<string, EChartGraphEdge>([
+    ['🌚 > 🌞', { source: '🌚', target: '🌞' }],
+    ['🌏 > 🌚', { source: '🌏', target: '🌚' }],
+    ['🌞 > 🌏', { source: '🌞', target: '🌏' }],
+  ]),
 };
 
 export const clusterGermicule: GermiculeItem[] = [
@@ -124,16 +119,14 @@ export const clusterEChartGraphInfo: Partial<EChartGraphInfo> = {
     { name: '🎌', category: 2 },
     { name: '🏳️‍🌈', category: 2 },
   ],
-  edges: [
-    { source: '🔵', target: '🔴' },
-    { source: '🎌', target: '⛳' },
-    { target: '🎌', source: '🏳️‍🌈' },
-    { target: '⛳', source: '🏳️‍🌈' },
-    { target: '🔵', source: '🏳️‍🌈' },
-    { target: '🔴', source: '🏳️‍🌈' },
-    { source: '🏳️‍🌈', target: '⛳' },
-    { source: '🏳️‍🌈', target: '🎌' },
-  ],
+  edges: new Map<string, EChartGraphEdge>([
+    ['🔵 > 🔴', { source: '🔵', target: '🔴' }],
+    ['🎌 > ⛳', { source: '🎌', target: '⛳' }],
+    ['🏳️‍🌈 > 🎌', { source: '🏳️‍🌈', target: '🎌' }],
+    ['🏳️‍🌈 > ⛳', { source: '🏳️‍🌈', target: '⛳' }],
+    ['🏳️‍🌈 > 🔵', { source: '🏳️‍🌈', target: '🔵' }],
+    ['🏳️‍🌈 > 🔴', { source: '🏳️‍🌈', target: '🔴' }],
+  ]),
   clusters: new Map([
     ['unknown', { id: 0, name: 'unknown', members: [] }],
     ['colors', { id: 1, name: 'colors', members: ['🔴', '🔵'] }],
