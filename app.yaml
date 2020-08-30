@@ -12,6 +12,6 @@ manual_scaling:
   instances: 1
 resources:
   cpu: .5
-  memory_gb: 0.18
+  memory_gb: 0.91
   disk_size_gb: 4.9
 # [END app_yaml]
