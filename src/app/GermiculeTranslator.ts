@@ -377,6 +377,9 @@ export class GermiculeD3Translator extends GermiculeTranslator<
       //   color: this.theme.risks[Math.ceil(item.risk)],
       // };
     }
+    if (item.icon) {
+      result.icon = item.icon;
+    }
     return result;
   }
 

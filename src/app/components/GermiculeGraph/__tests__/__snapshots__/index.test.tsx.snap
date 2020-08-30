@@ -11,16 +11,31 @@ exports[`<D3GermiculeGraph  /> should match snapshot 1`] = `
     >
       <circle
         r="30"
-        style="stroke: #FFFFFF; stroke-width: 1.5;"
+        style="stroke: #FFFFFF; stroke-width: 1.5; fill: #FFFFFF;"
       />
       <text
-        dx="-5"
+        dx="35"
         dy="5"
         font-size="15"
       >
         🦄
       </text>
+      <image
+        clip-path="url(#clipObj)"
+        height="60"
+        href="/graphIcons/default.png"
+        width="60"
+      />
     </g>
+    <clippath
+      id="clipObj"
+    >
+      <circle
+        cx="30"
+        cy="30"
+        r="30"
+      />
+    </clippath>
   </svg>
 </div>
 `;

@@ -21,6 +21,7 @@ export class D3GermiculeGraph extends React.Component<Props, State> {
   mountPoint: Element | null;
   svg;
   simulation;
+  nodeSize = 30;
   // simulation?: d3.Simulation<GraphNode, GraphEdge>;
 
   constructor(props: Props) {
@@ -82,7 +83,7 @@ export class D3GermiculeGraph extends React.Component<Props, State> {
 
     this.simulation = d3
       .forceSimulation<GraphNode, GraphEdge>(nodes)
-      .force('charge', d3.forceManyBody().strength(-300).distanceMax(200))
+      .force('charge', d3.forceManyBody().strength(-300).distanceMax(1000))
       .force('link', d3.forceLink<GraphNode, GraphEdge>(links).strength(0.1));
 
     this.simulation.on('tick', () => {
@@ -94,6 +95,13 @@ export class D3GermiculeGraph extends React.Component<Props, State> {
 
       circle.attr('cx', (d: any) => d.x).attr('cy', (d: any) => d.y);
       text.attr('x', (d: any) => d.x).attr('y', (d: any) => d.y);
+      imgs.attr(
+        'transform',
+        (d: any) => `translate(${d.x - this.nodeSize}, ${d.y - this.nodeSize})`,
+      );
+      // imgs
+      //   .attr('x', (d: any) => d.x - this.nodeSize)
+      //   .attr('y', (d: any) => d.y - this.nodeSize);
     });
 
     const dragStarted = (d: GraphNode) => {
@@ -129,22 +137,38 @@ export class D3GermiculeGraph extends React.Component<Props, State> {
 
     const circle = node
       .append('circle')
-      .attr('r', 30)
+      .attr('r', this.nodeSize)
       .style('stroke', '#FFFFFF')
-      .style('stroke-width', 1.5);
+      .style('stroke-width', 1.5)
+      .style('fill', '#FFFFFF');
+
+    this.svg
+      .append('clipPath')
+      .attr('id', 'clipObj')
+      .append('circle')
+      .attr('cx', this.nodeSize)
+      .attr('cy', this.nodeSize)
+      .attr('r', this.nodeSize);
 
     const text = node
       .append('text')
       .text(node => node.id)
-      .attr('font-size', 15)
-      .attr('dx', -5)
+      .attr('font-size', this.nodeSize / 2)
+      .attr('dx', this.nodeSize + 5)
       .attr('dy', 5);
+
+    const imgs = node
+      .append('svg:image')
+      // .attr('class', 'icon')
+      .attr('xlink:href', (d: GraphNode) =>
+        d.icon ? d.icon : '/graphIcons/default.png',
+      )
+      .attr('width', this.nodeSize * 2)
+      .attr('height', this.nodeSize * 2)
+      .attr('clip-path', 'url(#clipObj)');
 
     // .style('fill', (d: any) => color(d.group))
     // .call(
-    //   d3
-    //     .drag()
-    // );
   }
 
   onSizeChange() {

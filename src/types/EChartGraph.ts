@@ -13,7 +13,7 @@ export interface GraphNode extends BaseGraphNode {
   symbolSize?: number;
   category?: number;
   itemStyle?: object;
-};
+}
 
 export interface GraphEdge extends BaseGraphEdge {
   source: string;
@@ -23,6 +23,6 @@ export interface GraphEdge extends BaseGraphEdge {
   _label?: string;
   _tooltip?: string;
   lineStyle?: object;
-};
+}
 
 export type GraphInfo = BaseGraphInfo<GraphNode, GraphEdge>;

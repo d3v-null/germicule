@@ -15,6 +15,7 @@ export type GermiculeNode = {
   contact?: number;
   description?: string;
   group?: GroupName;
+  icon?: string;
   connections: GermiculeItem[];
 };
 
