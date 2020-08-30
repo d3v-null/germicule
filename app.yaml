@@ -13,5 +13,5 @@ manual_scaling:
 resources:
   cpu: .5
   memory_gb: 0.91
-  disk_size_gb: 4.9
+  disk_size_gb: 10.1
 # [END app_yaml]
