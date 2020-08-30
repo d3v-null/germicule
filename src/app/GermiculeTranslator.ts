@@ -8,7 +8,7 @@ import {
   GermiculeItem,
   GermiculeMeta,
   GermiculeNode,
-  GermiculeCluster,
+  GermiculeGroup,
   GraphThemeDef,
 } from '../types/Germicule';
 import {
@@ -22,7 +22,7 @@ import {
   GraphEdge as D3GraphEdge,
 } from '../types/D3Graph';
 import {
-  GraphCluster,
+  GraphGroup,
   GraphInfo,
   GraphEdge as BaseGraphEdge,
   GraphNode as BaseGraphNode,
@@ -58,15 +58,15 @@ export abstract class GermiculeTranslator<
     return this.unknownCount++;
   }
 
-  clusterCount: number = 0;
-  clustersSeen = new Map<string, number>();
+  groupCount: number = 0;
+  groupsSeen = new Map<string, number>();
 
-  getClusterId(name: string) {
-    if (!this.clustersSeen.has(name)) {
-      this.clustersSeen.set(name, this.clusterCount++);
-      return this.clusterCount;
+  getGroupId(name: string) {
+    if (!this.groupsSeen.has(name)) {
+      this.groupsSeen.set(name, this.groupCount++);
+      return this.groupCount;
     }
-    return this.clustersSeen.get(name);
+    return this.groupsSeen.get(name);
   }
 
   nodeCount: number = 0;
@@ -85,9 +85,9 @@ export abstract class GermiculeTranslator<
   }
 
   defaultEdge: Partial<GraphEdge> = {};
-  defaultClusterEdge: Partial<GraphEdge> = {};
+  defaultGroupEdge: Partial<GraphEdge> = {};
 
-  defaultCategoryInfo: Partial<GraphCluster> = {};
+  defaultCategoryInfo: Partial<GraphGroup> = {};
 
   toNode(item: GermiculeItem): GraphNode {
     throw new Error('toNode(item: GermiculeItem): GraphNode not implemented');
@@ -105,7 +105,7 @@ export abstract class GermiculeTranslator<
     );
   }
 
-  setNodeClusterIndex(node: GraphNode, clusterIndex: number): void {
+  setNodeGroupIndex(node: GraphNode, groupIndex: number): void {
     throw new Error(
       'getNodeIdentifier(node: GraphNode): string not implemented',
     );
@@ -132,8 +132,8 @@ export abstract class GermiculeTranslator<
         );
         return;
       }
-      if ('germicule' in member) {
-        this.buildGraph(member.germicule, accumulator);
+      if ('connections' in member) {
+        this.buildGraph(member.connections, accumulator);
       }
       const node: GraphNode = this.toNode(member);
       const source = this.getNodeIdentifier(node);
@@ -149,31 +149,29 @@ export abstract class GermiculeTranslator<
           source: this.getNodeIdentifier(node),
         } as GraphEdge);
       }
-      if ('cluster' in member) {
-        if (!accumulator.clusters.has(member.cluster!)) {
-          accumulator.clusters.set(member.cluster!, {
-            name: member.cluster,
+      if ('group' in member) {
+        if (!accumulator.groups.has(member.group!)) {
+          accumulator.groups.set(member.group!, {
+            name: member.group,
             members: [],
-            id: this.getClusterId(member.cluster!),
-          } as GraphCluster);
+            id: this.getGroupId(member.group!),
+          } as GraphGroup);
         }
-        const cluster: GraphCluster = accumulator.clusters.get(
-          member.cluster!,
-        )!;
-        if (cluster.members === undefined) {
-          cluster.members = [];
+        const group: GraphGroup = accumulator.groups.get(member.group!)!;
+        if (group.members === undefined) {
+          group.members = [];
         }
-        cluster.members!.forEach(clusterMember => {
-          const edgeName = this.edgeName(source, clusterMember);
+        group.members!.forEach(groupMember => {
+          const edgeName = this.edgeName(source, groupMember);
           if (accumulator.edges.has(edgeName)) return;
           accumulator.edges.set(edgeName, {
-            ...this.defaultClusterEdge,
+            ...this.defaultGroupEdge,
             source: this.getNodeIdentifier(node),
-            target: clusterMember,
+            target: groupMember,
           } as GraphEdge);
         });
-        cluster.members!.push(this.getNodeIdentifier(node));
-        this.setNodeClusterIndex(node, cluster.id);
+        group.members!.push(this.getNodeIdentifier(node));
+        this.setNodeGroupIndex(node, group.id);
       }
       parentPartialEdges.push(
         this.toPartialEdge(member, this.getNodeIdentifier(node)) as GraphEdge,
@@ -192,8 +190,8 @@ export abstract class GermiculeTranslator<
 
   toGraphInfo(data: GermiculeMeta): GraphInfo<GraphNode, GraphEdge> {
     const accumulator = this.getAccumulator(data);
-    if (data && 'germicules' in data) {
-      this.buildGraph(data.germicules, accumulator);
+    if (data && 'connections' in data) {
+      this.buildGraph(data.connections, accumulator);
     }
     // console.log('accumulator', accumulator);
     return accumulator;
@@ -209,7 +207,7 @@ export class GermiculeEChartTranslator extends GermiculeTranslator<
   constructor(theme?: GraphThemeDef, symbolSize?: number) {
     super(theme);
     this.symbolSize = symbolSize ? symbolSize : 30;
-    this.clustersSeen.set(
+    this.groupsSeen.set(
       this.defaultCategoryInfo.name,
       this.defaultCategoryInfo.id,
     );
@@ -219,8 +217,8 @@ export class GermiculeEChartTranslator extends GermiculeTranslator<
     return node.name;
   }
 
-  setNodeClusterIndex(node: EChartGraphNode, clusterIndex: number): void {
-    node.category = clusterIndex;
+  setNodeGroupIndex(node: EChartGraphNode, groupIndex: number): void {
+    node.category = groupIndex;
   }
 
   getDefaultNode(): Partial<EChartGraphNode> {
@@ -268,7 +266,7 @@ export class GermiculeEChartTranslator extends GermiculeTranslator<
       type: 'solid',
     },
   };
-  defaultClusterEdge: Partial<EChartGraphEdge> = {
+  defaultGroupEdge: Partial<EChartGraphEdge> = {
     lineStyle: {
       type: 'none',
     },
@@ -277,7 +275,7 @@ export class GermiculeEChartTranslator extends GermiculeTranslator<
     },
   };
 
-  defaultCategoryInfo: GraphCluster = {
+  defaultCategoryInfo: GraphGroup = {
     name: defaultCategory,
     members: [],
     id: 0,
@@ -302,23 +300,23 @@ export class GermiculeEChartTranslator extends GermiculeTranslator<
       nodes: [],
       edges: new Map<string, EChartGraphEdge>(),
       partialEdges: [],
-      clusters: new Map<string, GraphCluster>([
+      groups: new Map<string, GraphGroup>([
         [this.defaultCategoryInfo.name, this.defaultCategoryInfo],
       ]),
     };
-    if (!data || data.germicules.length === 0) {
+    if (!data || data.connections.length === 0) {
       result.nodes.push({
         ...this.getDefaultNode(),
         _tooltip: 'your germicule is empty',
       } as EChartGraphNode);
       return result;
     }
-    if ('clusters' in data) {
-      data.clusters?.forEach((cluster: GermiculeCluster) => {
-        result.clusters!.set(cluster.name, {
-          ...cluster,
-          id: this.getClusterId(cluster.name),
-        } as GraphCluster);
+    if ('groups' in data) {
+      data.groups?.forEach((group: GermiculeGroup) => {
+        result.groups!.set(group.name, {
+          ...group,
+          id: this.getGroupId(group.name),
+        } as GraphGroup);
       });
     }
     return result;
@@ -333,7 +331,7 @@ export class GermiculeD3Translator extends GermiculeTranslator<
     super(theme);
   }
 
-  defaultCategoryInfo: GraphCluster = {
+  defaultCategoryInfo: GraphGroup = {
     name: defaultCategory,
     members: [],
     id: 0,
@@ -350,8 +348,8 @@ export class GermiculeD3Translator extends GermiculeTranslator<
     return node.id;
   }
 
-  setNodeClusterIndex(node: D3GraphNode, clusterIndex: number): void {
-    node.group = clusterIndex;
+  setNodeGroupIndex(node: D3GraphNode, groupIndex: number): void {
+    node.group = groupIndex;
   }
 
   toNode(item: GermiculeItem): D3GraphNode {
@@ -401,23 +399,23 @@ export class GermiculeD3Translator extends GermiculeTranslator<
       nodes: [],
       edges: new Map<string, D3GraphEdge>(),
       partialEdges: [],
-      clusters: new Map<string, GraphCluster>([
+      groups: new Map<string, GraphGroup>([
         [this.defaultCategoryInfo.name, this.defaultCategoryInfo],
       ]),
     };
-    if (!data || data.germicules.length === 0) {
+    if (!data || data.connections.length === 0) {
       result.nodes.push({
         ...this.getDefaultNode(),
         _tooltip: 'your germicule is empty',
       } as D3GraphNode);
       return result;
     }
-    if ('clusters' in data) {
-      data.clusters?.forEach((cluster: GermiculeCluster) => {
-        result.clusters!.set(cluster.name, {
-          ...cluster,
-          id: this.getClusterId(cluster.name),
-        } as GraphCluster);
+    if ('groups' in data) {
+      data.groups?.forEach((group: GermiculeGroup) => {
+        result.groups!.set(group.name, {
+          ...group,
+          id: this.getGroupId(group.name),
+        } as GraphGroup);
       });
     }
     return result;

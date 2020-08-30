@@ -287,7 +287,7 @@ exports[`<GermiculeEnvironment  /> should match snapshot for D3 1`] = `
                               "
                             </span>
                             <span>
-                              clusters
+                              groups
                             </span>
                             <span
                               style="vertical-align: top;"
@@ -552,7 +552,7 @@ exports[`<GermiculeEnvironment  /> should match snapshot for D3 1`] = `
                                       style="cursor: default;"
                                     >
                                       "
-                                      cluster
+                                      group
                                       "
                                     </span>
                                   </div>
@@ -1030,7 +1030,7 @@ exports[`<GermiculeEnvironment  /> should match snapshot for D3 1`] = `
                               "
                             </span>
                             <span>
-                              germicules
+                              connections
                             </span>
                             <span
                               style="vertical-align: top;"
@@ -1384,7 +1384,7 @@ exports[`<GermiculeEnvironment  /> should match snapshot for D3 1`] = `
                                     <span
                                       style="display: inline-block;"
                                     >
-                                      cluster
+                                      group
                                     </span>
                                     <span
                                       style="vertical-align: top;"
@@ -1410,7 +1410,7 @@ exports[`<GermiculeEnvironment  /> should match snapshot for D3 1`] = `
                                       style="cursor: default;"
                                     >
                                       "
-                                      cluster
+                                      group
                                       "
                                     </span>
                                   </div>
@@ -1852,7 +1852,7 @@ exports[`<GermiculeEnvironment  /> should match snapshot for eChart 1`] = `
                               "
                             </span>
                             <span>
-                              clusters
+                              groups
                             </span>
                             <span
                               style="vertical-align: top;"
@@ -2117,7 +2117,7 @@ exports[`<GermiculeEnvironment  /> should match snapshot for eChart 1`] = `
                                       style="cursor: default;"
                                     >
                                       "
-                                      cluster
+                                      group
                                       "
                                     </span>
                                   </div>
@@ -2497,7 +2497,7 @@ exports[`<GermiculeEnvironment  /> should match snapshot for eChart 1`] = `
                               "
                             </span>
                             <span>
-                              germicules
+                              connections
                             </span>
                             <span
                               style="vertical-align: top;"
@@ -2851,7 +2851,7 @@ exports[`<GermiculeEnvironment  /> should match snapshot for eChart 1`] = `
                                     <span
                                       style="display: inline-block;"
                                     >
-                                      cluster
+                                      group
                                     </span>
                                     <span
                                       style="vertical-align: top;"
@@ -2877,7 +2877,7 @@ exports[`<GermiculeEnvironment  /> should match snapshot for eChart 1`] = `
                                       style="cursor: default;"
                                     >
                                       "
-                                      cluster
+                                      group
                                       "
                                     </span>
                                   </div>

@@ -7,7 +7,7 @@
  */
 import React from 'react';
 import { GermiculeEditor } from '../GermiculeEditor';
-import { GermiculeMeta, GermiculeCluster } from '../../../types/Germicule';
+import { GermiculeMeta, GermiculeGroup } from '../../../types/Germicule';
 import SplitterLayout from 'react-splitter-layout';
 import 'react-splitter-layout/lib/index.css';
 
@@ -40,8 +40,8 @@ const SIZING = {
 
 export const DEFAULT_SRC = {
   version: '0.2',
-  clusters: [{ name: 'cluster', members: [] } as GermiculeCluster],
-  germicules: [{ name: '❓', cluster: 'cluster' }],
+  groups: [{ name: 'group', members: [] } as GermiculeGroup],
+  connections: [{ name: '❓', group: 'group' }],
 } as GermiculeMeta;
 
 export function DEFAULT_ON_UPDATE_SRC(params: { src: object }): void {}

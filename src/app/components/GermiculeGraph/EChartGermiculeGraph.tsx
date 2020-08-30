@@ -30,7 +30,7 @@ export class EChartGermiculeGraph extends React.Component<Props, State> {
   }
 
   getOptions() {
-    const categories = Array.from(this.state.graphInfo.clusters!.values());
+    const categories = Array.from(this.state.graphInfo.groups!.values());
     // console.log(categories);
     const result = {
       legend: {},

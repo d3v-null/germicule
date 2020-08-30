@@ -4,13 +4,13 @@ import {
   lonelyGermicule,
   twinGermicule,
   linkGermicule,
-  clusterGermicule,
+  groupGermicule,
   emptyEChartGraphInfo,
   unknownEChartGraphInfo,
   lonelyEChartGraphInfo,
   twinEChartGraphInfo,
   linkEChartGraphInfo,
-  clusterEChartGraphInfo,
+  groupEChartGraphInfo,
 } from './germicule.data';
 import { GermiculeEChartTranslator } from '../GermiculeTranslator';
 
@@ -31,28 +31,28 @@ describe('GermiculeEChartTranslator.toGraphInfo', () => {
     const translator: GermiculeEChartTranslator = new GermiculeEChartTranslator(
       COLORS,
     );
-    const result = translator.toGraphInfo({ germicules: emptyGermicule });
+    const result = translator.toGraphInfo({ connections: emptyGermicule });
     expect(result).toMatchObject(emptyEChartGraphInfo);
   });
   it('should handle unknown germicule data', () => {
     const translator: GermiculeEChartTranslator = new GermiculeEChartTranslator(
       COLORS,
     );
-    const result = translator.toGraphInfo({ germicules: unknownGermicule });
+    const result = translator.toGraphInfo({ connections: unknownGermicule });
     expect(result).toMatchObject(unknownEChartGraphInfo);
   });
   it('should handle lonely germicule data', () => {
     const translator: GermiculeEChartTranslator = new GermiculeEChartTranslator(
       COLORS,
     );
-    const result = translator.toGraphInfo({ germicules: lonelyGermicule });
+    const result = translator.toGraphInfo({ connections: lonelyGermicule });
     expect(result).toMatchObject(lonelyEChartGraphInfo);
   });
   it('should handle twin germicule data', () => {
     const translator: GermiculeEChartTranslator = new GermiculeEChartTranslator(
       COLORS,
     );
-    const result = translator.toGraphInfo({ germicules: twinGermicule });
+    const result = translator.toGraphInfo({ connections: twinGermicule });
     expect(result.nodes).toMatchObject(twinEChartGraphInfo.nodes!);
     expect(Array.from(result.edges.values())).toMatchObject(
       Array.from(twinEChartGraphInfo.edges!.values()),
@@ -62,21 +62,21 @@ describe('GermiculeEChartTranslator.toGraphInfo', () => {
     const translator: GermiculeEChartTranslator = new GermiculeEChartTranslator(
       COLORS,
     );
-    const result = translator.toGraphInfo({ germicules: linkGermicule });
+    const result = translator.toGraphInfo({ connections: linkGermicule });
     expect(result.nodes).toMatchObject(linkEChartGraphInfo.nodes!);
     expect(Array.from(result.edges.values())).toMatchObject(
       Array.from(linkEChartGraphInfo.edges!.values()),
     );
   });
-  it('should handle cluster germicule data', () => {
+  it('should handle group germicule data', () => {
     const translator: GermiculeEChartTranslator = new GermiculeEChartTranslator(
       COLORS,
     );
-    const result = translator.toGraphInfo({ germicules: clusterGermicule });
-    expect(result.nodes).toMatchObject(clusterEChartGraphInfo.nodes!);
-    expect(result.clusters).toMatchObject(clusterEChartGraphInfo.clusters!);
+    const result = translator.toGraphInfo({ connections: groupGermicule });
+    expect(result.nodes).toMatchObject(groupEChartGraphInfo.nodes!);
+    expect(result.groups).toMatchObject(groupEChartGraphInfo.groups!);
     expect(Array.from(result.edges.values())).toMatchObject(
-      Array.from(clusterEChartGraphInfo.edges!.values()),
+      Array.from(groupEChartGraphInfo.edges!.values()),
     );
   });
 });

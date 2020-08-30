@@ -4,9 +4,9 @@ export type GermiculeLink = {
   description?: string;
 };
 
-export type ReservedClusterNames = '❓';
+export type ReservedGroupNames = '❓';
 
-export type ClusterName = Exclude<string, ReservedClusterNames>;
+export type GroupName = Exclude<string, ReservedGroupNames>;
 
 export type GermiculeNode = {
   name: string;
@@ -14,22 +14,22 @@ export type GermiculeNode = {
   risk?: number;
   contact?: number;
   description?: string;
-  cluster?: ClusterName;
-  germicule: GermiculeItem[];
+  group?: GroupName;
+  connections: GermiculeItem[];
 };
 
 export type GermiculeItem = GermiculeNode | GermiculeLink | null;
 
-export type GermiculeCluster = {
-  name: ClusterName;
+export type GermiculeGroup = {
+  name: GroupName;
   location?: string;
   members?: string[];
 };
 
 export type GermiculeMeta = {
   version?: string;
-  clusters?: GermiculeCluster[];
-  germicules: GermiculeItem[];
+  groups?: GermiculeGroup[];
+  connections: GermiculeItem[];
 };
 
 export type GraphThemeDef = {

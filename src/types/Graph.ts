@@ -7,7 +7,7 @@ export type GraphEdge = {
   target: any;
 };
 
-export type GraphCluster = {
+export type GraphGroup = {
   id: number;
   name: string;
   members: string[];
@@ -18,5 +18,5 @@ export type GraphInfo<GraphNode, GraphEdge> = {
   nodes: GraphNode[];
   edges: Map<string, GraphEdge>;
   partialEdges: Partial<GraphEdge[]>;
-  clusters: Map<string, GraphCluster>;
+  groups: Map<string, GraphGroup>;
 };

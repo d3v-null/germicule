@@ -4,13 +4,13 @@ import {
   lonelyGermicule,
   twinGermicule,
   linkGermicule,
-  clusterGermicule,
+  groupGermicule,
   emptyD3GraphInfo,
   unknownD3GraphInfo,
   lonelyD3GraphInfo,
   // twinD3GraphInfo,
   // linkD3GraphInfo,
-  // clusterD3GraphInfo,
+  // groupD3GraphInfo,
 } from './germicule.data';
 import { GermiculeD3Translator } from '../GermiculeTranslator';
 
@@ -29,38 +29,38 @@ const COLORS = {
 describe('GermiculeD3Translator.toGraphInfo', () => {
   it('should handle empty germicule data', () => {
     const translator: GermiculeD3Translator = new GermiculeD3Translator(COLORS);
-    const result = translator.toGraphInfo({ germicules: emptyGermicule });
+    const result = translator.toGraphInfo({ connections: emptyGermicule });
     expect(result).toMatchObject(emptyD3GraphInfo);
   });
   it('should handle unknown germicule data', () => {
     const translator: GermiculeD3Translator = new GermiculeD3Translator(COLORS);
-    const result = translator.toGraphInfo({ germicules: unknownGermicule });
+    const result = translator.toGraphInfo({ connections: unknownGermicule });
     expect(result).toMatchObject(unknownD3GraphInfo);
   });
   it('should handle lonely germicule data', () => {
     const translator: GermiculeD3Translator = new GermiculeD3Translator(COLORS);
-    const result = translator.toGraphInfo({ germicules: lonelyGermicule });
+    const result = translator.toGraphInfo({ connections: lonelyGermicule });
     expect(result).toMatchObject(lonelyD3GraphInfo);
   });
   // it('should handle twin germicule data', () => {
   //   const translator: GermiculeD3Translator = new GermiculeD3Translator(
   //     COLORS,
   //   );
-  //   const result = translator.toGraphInfo({ germicules: twinGermicule });
+  //   const result = translator.toGraphInfo({ connections: twinGermicule });
   //   expect(result).toMatchObject(twinD3GraphInfo);
   // });
   // it('should handle link germicule data', () => {
   //   const translator: GermiculeD3Translator = new GermiculeD3Translator(
   //     COLORS,
   //   );
-  //   const result = translator.toGraphInfo({ germicules: linkGermicule });
+  //   const result = translator.toGraphInfo({ connections: linkGermicule });
   //   expect(result).toMatchObject(linkD3GraphInfo);
   // });
-  // it('should handle cluster germicule data', () => {
+  // it('should handle group germicule data', () => {
   //   const translator: GermiculeD3Translator = new GermiculeD3Translator(
   //     COLORS,
   //   );
-  //   const result = translator.toGraphInfo({ germicules: clusterGermicule });
-  //   expect(result).toMatchObject(clusterD3GraphInfo);
+  //   const result = translator.toGraphInfo({ connections: groupGermicule });
+  //   expect(result).toMatchObject(groupD3GraphInfo);
   // });
 });

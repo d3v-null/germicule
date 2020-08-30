@@ -2,7 +2,7 @@
  *
  * GermiculeEditor
  *
- * an interactive JSON editor for germicules
+ * an interactive JSON editor for connections
  *
  */
 import React from 'react';

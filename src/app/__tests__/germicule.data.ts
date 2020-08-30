@@ -35,7 +35,7 @@ export const twinGermicule: GermiculeItem[] = [
   {
     name: '🌞',
     risk: 3,
-    germicule: [
+    connections: [
       {
         name: '🌏',
         risk: 2,
@@ -65,15 +65,15 @@ export const twinD3GraphInfo: Partial<D3GraphInfo> = {
 export const linkGermicule: GermiculeItem[] = [
   {
     name: '🌞',
-    germicule: [
+    connections: [
       {
         name: '🌏',
         description: 'planet',
-        germicule: [
+        connections: [
           {
             name: '🌚',
             description: 'sattelite',
-            germicule: [
+            connections: [
               {
                 link: '🌞',
                 description: 'best buds',
@@ -98,20 +98,20 @@ export const linkEChartGraphInfo: Partial<EChartGraphInfo> = {
   ]),
 };
 
-export const clusterGermicule: GermiculeItem[] = [
+export const groupGermicule: GermiculeItem[] = [
   {
     name: '🏳️‍🌈',
-    cluster: 'flags',
-    germicule: [
-      { name: '🔴', cluster: 'colors' },
-      { name: '🔵', cluster: 'colors' },
-      { name: '⛳', cluster: 'flags' },
-      { name: '🎌', cluster: 'flags' },
+    group: 'flags',
+    connections: [
+      { name: '🔴', group: 'colors' },
+      { name: '🔵', group: 'colors' },
+      { name: '⛳', group: 'flags' },
+      { name: '🎌', group: 'flags' },
     ],
   },
 ] as GermiculeItem[];
 
-export const clusterEChartGraphInfo: Partial<EChartGraphInfo> = {
+export const groupEChartGraphInfo: Partial<EChartGraphInfo> = {
   nodes: [
     { name: '🔴', category: 1 },
     { name: '🔵', category: 1 },
@@ -127,7 +127,7 @@ export const clusterEChartGraphInfo: Partial<EChartGraphInfo> = {
     ['🏳️‍🌈 > 🔵', { source: '🏳️‍🌈', target: '🔵' }],
     ['🏳️‍🌈 > 🔴', { source: '🏳️‍🌈', target: '🔴' }],
   ]),
-  clusters: new Map([
+  groups: new Map([
     ['unknown', { id: 0, name: 'unknown', members: [] }],
     ['colors', { id: 1, name: 'colors', members: ['🔴', '🔵'] }],
     ['flags', { id: 2, name: 'flags', members: ['⛳', '🎌', '🏳️‍🌈'] }],

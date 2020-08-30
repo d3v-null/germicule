@@ -1,34 +1,34 @@
 export default {
   version: '0.2',
-  clusters: [
+  groups: [
     {
       name: 'Lygon',
       location: '',
     },
   ],
-  germicules: [
+  connections: [
     {
       name: '👨‍🎤',
       risk: 2,
-      germicule: [
+      connections: [
         {
           name: '🐺',
           risk: 2,
           contact: 1,
           description: 'Ex-housemate',
-          cluster: 'Lygon',
-          germicule: [
+          group: 'Lygon',
+          connections: [
             {
               name: '🐭',
               risk: 1,
               contact: null,
-              germicule: [null],
+              connections: [null],
             },
             {
               name: '🐶',
               risk: 1,
               contact: null,
-              germicule: [null],
+              connections: [null],
             },
           ],
         },
@@ -37,27 +37,27 @@ export default {
           risk: null,
           contact: 1,
           description: 'Ex-housemate',
-          cluster: 'Lygon',
-          germicule: [
+          group: 'Lygon',
+          connections: [
             {
               name: '😿',
               risk: 1.5,
               contact: 0,
               description: 'Partner',
-              cluster: 'Union',
-              germicule: [
+              group: 'Union',
+              connections: [
                 {
                   name: '🦕',
                   risk: null,
                   contact: 1,
                   description: 'Housemate',
-                  cluster: 'Union',
-                  germicule: [null],
+                  group: 'Union',
+                  connections: [null],
                 },
                 {
                   name: '🔧',
-                  cluster: 'Union',
-                  germicule: [null],
+                  group: 'Union',
+                  connections: [null],
                 },
               ],
             },
@@ -74,14 +74,14 @@ export default {
           risk: 1.5,
           contact: 1,
           description: 'Housemate',
-          cluster: 'Kewties',
-          germicule: [
+          group: 'Kewties',
+          connections: [
             {
               name: '🔮',
               risk: 1.5,
               contact: 2.3,
               description: 'Partner',
-              germicule: [null],
+              connections: [null],
             },
             {
               link: '😿',
@@ -94,22 +94,22 @@ export default {
           risk: 1.2,
           contact: 1,
           description: 'Housemate',
-          cluster: 'Kewties',
+          group: 'Kewties',
         },
         {
           name: '👷',
           risk: 1.5,
           contact: 1,
           description: 'Housemate',
-          cluster: 'Kewties',
+          group: 'Kewties',
         },
         {
           name: '🌳',
           risk: 2,
           contact: 1,
           description: 'Housemate,',
-          cluster: 'Kewties',
-          germicule: [
+          group: 'Kewties',
+          connections: [
             {
               name: '🍎',
               risk: 3,
@@ -121,8 +121,8 @@ export default {
           risk: 1.1,
           contact: 1,
           description: 'Potential Housemate',
-          cluster: 'Kewties',
-          germicule: [
+          group: 'Kewties',
+          connections: [
             {
               link: '👓',
               contact: 0,
@@ -133,7 +133,7 @@ export default {
           name: '👓',
           contact: 1,
           dscription: 'Potential Housemate',
-          cluster: 'Kewties',
+          group: 'Kewties',
         },
       ],
     },

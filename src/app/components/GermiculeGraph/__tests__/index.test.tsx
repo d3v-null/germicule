@@ -22,7 +22,7 @@ afterAll(() => {
 describe('<EChartGermiculeGraph  />', () => {
   it('should match snapshot', () => {
     const result = render(
-      <EChartGermiculeGraph data={{ germicules: lonelyGermicule }} />,
+      <EChartGermiculeGraph data={{ connections: lonelyGermicule }} />,
     );
     expect(result.container.firstChild).toMatchSnapshot();
   });
@@ -31,7 +31,7 @@ describe('<D3GermiculeGraph  />', () => {
   it('should match snapshot', () => {
     const result = render(
       <D3GermiculeGraph
-        data={{ germicules: lonelyGermicule }}
+        data={{ connections: lonelyGermicule }}
         size={{ width: 100, height: 100 }}
       />,
     );
