@@ -172,6 +172,8 @@ export class GermiculeEnvironment extends React.Component<Props, State> {
         primaryMinSize={this.state.splitterPrimaryMin}
         secondaryMinSize={this.state.splitterSecondaryMin}
         onDragEnd={this.onUpdateDimensions}
+        onPrimaryPaneSizeChange={this.onUpdateDimensions}
+        onSecondaryPaneSizeChange={this.onUpdateDimensions}
       >
         {this.getComponents().map((v, i) => (
           <div key={i}>{v}</div>

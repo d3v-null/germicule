@@ -5,7 +5,7 @@ import { GraphInfo, GraphEdge, GraphNode } from '../../../types/D3Graph';
 import * as d3 from 'd3';
 import { GermiculeD3Translator as GermiculeTranslator } from 'app/GermiculeTranslator';
 import { BoxSize } from 'types';
-// import * as _ from 'lodash';
+import * as _ from 'lodash';
 
 interface Props {
   data: GermiculeMeta;
@@ -13,22 +13,20 @@ interface Props {
 }
 
 interface State {
-  data: GermiculeMeta;
   graphInfo: GraphInfo;
-  size: BoxSize;
 }
 
 export class D3GermiculeGraph extends React.Component<Props, State> {
   translator: GermiculeTranslator;
   mountPoint: Element | null;
-  svg: any;
+  svg;
+  simulation;
   // simulation?: d3.Simulation<GraphNode, GraphEdge>;
 
   constructor(props: Props) {
     super(props);
     this.translator = new GermiculeTranslator();
     this.state = {
-      ...props,
       graphInfo: this.translator.toGraphInfo(this.props.data),
     };
     this.mountPoint = null;
@@ -44,6 +42,9 @@ export class D3GermiculeGraph extends React.Component<Props, State> {
   }
 
   getConfig() {
+    const {
+      size: { width, height },
+    } = this.props;
     const result = {
       nodeHighlightBehavior: true,
       node: {
@@ -54,20 +55,15 @@ export class D3GermiculeGraph extends React.Component<Props, State> {
       link: {
         highlightColor: 'lightblue',
       },
-      height: this.state.size ? this.state.size.height : undefined,
-      width: this.state.size ? this.state.size.width : undefined,
+      height,
+      width,
     };
-    if (this.state.size) {
-      result.height = this.state.size.height;
-      result.width = this.state.size.width;
-    }
-    console.log('getConfig', result);
+    // console.log('getConfig', result);
     return result;
   }
 
   componentDidMount() {
     const {
-      size: { width, height },
       graphInfo: { nodes, edges },
     } = this.state;
     const links = Array.from(edges.values());
@@ -84,13 +80,12 @@ export class D3GermiculeGraph extends React.Component<Props, State> {
       .attr('stroke-width', (d: GraphEdge) => Math.sqrt(d.value!));
     // .style('stroke-width', (d: any) => Math.sqrt(d.value));
 
-    const simulation = d3
+    this.simulation = d3
       .forceSimulation<GraphNode, GraphEdge>(nodes)
       .force('charge', d3.forceManyBody().strength(-300).distanceMax(200))
-      .force('link', d3.forceLink<GraphNode, GraphEdge>(links).strength(0.1))
-      .force('center', d3.forceCenter(width / 2, height / 2));
+      .force('link', d3.forceLink<GraphNode, GraphEdge>(links).strength(0.1));
 
-    simulation.on('tick', () => {
+    this.simulation.on('tick', () => {
       link
         .attr('x1', (d: any) => d.source.x)
         .attr('y1', (d: any) => d.source.y)
@@ -102,7 +97,7 @@ export class D3GermiculeGraph extends React.Component<Props, State> {
     });
 
     const dragStarted = (d: GraphNode) => {
-      if (!d3.event.active) simulation.alphaTarget(0.7).restart();
+      if (!d3.event.active) this.simulation.alphaTarget(0.7).restart();
       d.fx = d.x;
       d.fy = d.y;
     };
@@ -113,7 +108,7 @@ export class D3GermiculeGraph extends React.Component<Props, State> {
     };
 
     const dragEnded = (d: GraphNode) => {
-      if (!d3.event.active) simulation.alphaTarget(0);
+      if (!d3.event.active) this.simulation.alphaTarget(0);
       d.fx = null;
       d.fy = null;
     };
@@ -152,12 +147,24 @@ export class D3GermiculeGraph extends React.Component<Props, State> {
     // );
   }
 
-  componentDidUpdate() {
+  onSizeChange() {
     const {
       size: { width, height },
+    } = this.props;
+    console.log('width', width, 'height', height);
+    this.svg.attr('width', width).attr('height', height);
+    this.simulation.force('center', d3.forceCenter(width / 2, height / 2));
+    this.simulation.restart();
+  }
+
+  componentDidUpdate(prevProps: Props, prevState: State) {
+    const {
+      size,
       // graphInfo: { nodes, edges },
     } = this.props;
-    this.svg.attr('width', width).attr('height', height);
+    if (!_.isEqual(size, prevProps.size)) {
+      this.onSizeChange();
+    }
   }
 
   render() {

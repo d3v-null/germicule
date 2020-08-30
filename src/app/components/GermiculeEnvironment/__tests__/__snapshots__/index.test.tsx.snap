@@ -1535,10 +1535,7 @@ exports[`<GermiculeEnvironment  /> should match snapshot for D3 1`] = `
         id="germicule-graph-d3"
         style="width: 800px; height: 400px;"
       >
-        <svg
-          height="400"
-          width="800"
-        >
+        <svg>
           <line
             stroke-width="NaN"
             style="stroke: #999999; stroke-opacity: 0.6;"
