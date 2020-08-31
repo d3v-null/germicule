@@ -26,7 +26,9 @@ import {
   GraphInfo,
   GraphEdge as BaseGraphEdge,
   GraphNode as BaseGraphNode,
+  GraphNode,
 } from '../types/Graph';
+import * as _ from 'lodash';
 
 export const defaultCategory = 'unknown';
 
@@ -61,23 +63,23 @@ export abstract class GermiculeTranslator<
   groupCount: number = 0;
   groupsSeen = new Map<string, number>();
 
-  getGroupId(name: string) {
+  getGroupIndex(name: string) {
     if (!this.groupsSeen.has(name)) {
       this.groupsSeen.set(name, this.groupCount++);
       return this.groupCount;
     }
-    return this.groupsSeen.get(name);
+    return this.groupsSeen.get(name)!;
   }
 
   nodeCount: number = 0;
   nodesSeen = new Map<string, number>();
 
-  getNodeId(name: string) {
+  getNodeIndex(name: string) {
     if (!this.nodesSeen.has(name)) {
       this.nodesSeen.set(name, this.nodeCount++);
       return this.nodeCount;
     }
-    return this.nodesSeen.get(name);
+    return this.nodesSeen.get(name)!;
   }
 
   getDefaultNode(): Partial<GraphNode> {
@@ -100,23 +102,126 @@ export abstract class GermiculeTranslator<
   }
 
   getNodeIdentifier(node: GraphNode): string {
-    throw new Error(
-      'getNodeIdentifier(node: GraphNode): string not implemented',
-    );
+    throw new Error('not implemented');
+  }
+
+  getEdgeIdentifier(source: any, target: any): string {
+    return `${source} > ${target}`;
+  }
+
+  isPlaceHolder(node: GraphNode): boolean {
+    return node.placeholder === true;
   }
 
   setNodeGroupIndex(node: GraphNode, groupIndex: number): void {
-    throw new Error(
-      'getNodeIdentifier(node: GraphNode): string not implemented',
-    );
+    throw new Error('not implemented');
   }
 
   isValidRisk(risk: number): boolean {
     return Math.ceil(risk) < Array.from(this.theme.risks.keys()).length;
   }
 
-  edgeName(source: string, target: string): string {
-    return `${source} > ${target}`;
+  accumulateGroup(
+    accumulator: GraphInfo<GraphNode, GraphEdge>,
+    group: GraphGroup,
+  ) {
+    const identifier: string = group.name;
+    if (accumulator.groups.has(identifier)) {
+      throw new Error(
+        `group with identifier ${identifier} defined twice: ${JSON.stringify(
+          group,
+        )}`,
+      );
+    }
+    // group.id = this.getGroupIndex(group.name);
+    accumulator.groups.set(identifier, group);
+  }
+
+  accumulateNode(
+    accumulator: GraphInfo<GraphNode, GraphEdge>,
+    node: GraphNode,
+  ) {
+    const identifier: string = this.getNodeIdentifier(node);
+    if (
+      accumulator.nodes.has(identifier) &&
+      !this.isPlaceHolder(accumulator.nodes.get(identifier)!)
+    ) {
+      throw new Error(
+        `node with identifier ${identifier} defined twice: ${JSON.stringify(
+          node,
+        )}`,
+      );
+    }
+
+    accumulator.nodes.set(identifier, node);
+  }
+
+  accumulatePlaceHolderNode(
+    accumulator: GraphInfo<GraphNode, GraphEdge>,
+    identifier: string,
+  ) {
+    if (!accumulator.nodes.has(identifier)) {
+      this.accumulateNode(accumulator, {
+        ...this.toNode({ name: identifier }),
+        placeholder: true,
+      } as GraphNode);
+    }
+  }
+
+  accumulateEdge(
+    accumulator: GraphInfo<GraphNode, GraphEdge>,
+    edge: GraphEdge,
+  ) {
+    const identifier: string = this.getEdgeIdentifier(edge.source, edge.target);
+    if (accumulator.edges.has(identifier)) {
+      throw new Error(
+        `edge with identifier ${identifier} defined twice: ${JSON.stringify(
+          edge,
+        )}`,
+      );
+    }
+    this.accumulatePlaceHolderNode(accumulator, edge.source);
+    // edge.source = this.getNodeIndex(edge.source);
+    this.accumulatePlaceHolderNode(accumulator, edge.target);
+    // edge.target = this.getNodeIndex(edge.target);
+    // edge._label = identifier;
+    accumulator.edges.set(identifier, edge);
+  }
+
+  getAccumulator(data?: GermiculeMeta): GraphInfo<GraphNode, GraphEdge> {
+    const accumulator: GraphInfo<GraphNode, GraphEdge> = {
+      // nodes: data && data.nodes ? data.nodes!.map(this.toNode.bind(this)) : [],
+      nodes: new Map<string, GraphNode>(),
+      edges: new Map<string, GraphEdge>(),
+      partialEdges: [],
+      groups: new Map<string, GraphGroup>(),
+    };
+    this.accumulateGroup(accumulator, this.defaultCategoryInfo as GraphGroup);
+    if (
+      !data ||
+      _.isEmpty(data) ||
+      (_.isEmpty(data.connections) && _.isEmpty(data.nodes))
+    ) {
+      this.accumulateNode(accumulator, ({
+        ...this.getDefaultNode(),
+        _tooltip: 'your germicule is empty',
+      } as unknown) as GraphNode);
+      return accumulator;
+    }
+    if (data.nodes && !_.isEmpty(data.nodes)) {
+      data.nodes.forEach((node: GermiculeNode) => {
+        this.accumulateNode(accumulator, this.toNode(node));
+      });
+    }
+    if (data.groups && !_.isEmpty(data.groups)) {
+      data.groups.forEach((group: GermiculeGroup) => {
+        this.accumulateGroup(accumulator, {
+          ...group,
+          id: this.getGroupIndex(group.name),
+        } as GraphGroup);
+      });
+    }
+    return accumulator;
   }
 
   buildGraph(
@@ -125,36 +230,40 @@ export abstract class GermiculeTranslator<
   ): void {
     const parentPartialEdges: Partial<GraphEdge[]> = [];
     members.forEach((member: GermiculeItem) => {
-      if (!member) return;
-      if ('link' in member) {
+      if (member && 'link' in member) {
+        this.accumulatePlaceHolderNode(accumulator, member.link);
         parentPartialEdges.push(
           this.toPartialEdge(member, member.link) as GraphEdge,
         );
         return;
       }
-      if ('connections' in member) {
-        this.buildGraph(member.connections, accumulator);
+      if (member && member.connections) {
+        this.buildGraph(member.connections!, accumulator);
       }
       const node: GraphNode = this.toNode(member);
+      this.accumulateNode(accumulator, node);
+      if (!member) return;
       const source = this.getNodeIdentifier(node);
       while (accumulator.partialEdges.length) {
         const partialEdge = accumulator.partialEdges.pop();
         if (!partialEdge) return;
-        const edgeName = this.edgeName(source, partialEdge.target);
-        if (accumulator.edges.has(edgeName)) {
-          return;
+        const getEdgeIdentifier = this.getEdgeIdentifier(
+          source,
+          partialEdge.target,
+        );
+        if (!accumulator.edges.has(getEdgeIdentifier)) {
+          this.accumulateEdge(accumulator, {
+            ...partialEdge,
+            source,
+          } as GraphEdge);
         }
-        accumulator.edges.set(edgeName, {
-          ...partialEdge,
-          source: this.getNodeIdentifier(node),
-        } as GraphEdge);
       }
       if ('group' in member) {
         if (!accumulator.groups.has(member.group!)) {
-          accumulator.groups.set(member.group!, {
+          this.accumulateGroup(accumulator, {
             name: member.group,
             members: [],
-            id: this.getGroupId(member.group!),
+            id: this.getGroupIndex(member.group!),
           } as GraphGroup);
         }
         const group: GraphGroup = accumulator.groups.get(member.group!)!;
@@ -162,31 +271,29 @@ export abstract class GermiculeTranslator<
           group.members = [];
         }
         group.members!.forEach(groupMember => {
-          const edgeName = this.edgeName(source, groupMember);
-          if (accumulator.edges.has(edgeName)) return;
-          accumulator.edges.set(edgeName, {
+          const getEdgeIdentifier = this.getEdgeIdentifier(source, groupMember);
+          if (accumulator.edges.has(getEdgeIdentifier)) return;
+          this.accumulateEdge(accumulator, {
             ...this.defaultGroupEdge,
-            source: this.getNodeIdentifier(node),
+            source,
             target: groupMember,
           } as GraphEdge);
         });
-        group.members!.push(this.getNodeIdentifier(node));
+        group.members!.push(source);
         this.setNodeGroupIndex(node, group.id);
       }
       parentPartialEdges.push(
         this.toPartialEdge(member, this.getNodeIdentifier(node)) as GraphEdge,
       );
-      node.index = this.getNodeId(this.getNodeIdentifier(node));
-      accumulator.nodes.push(node);
     });
     accumulator.partialEdges.push(...parentPartialEdges);
   }
 
-  getAccumulator(data?: GermiculeMeta): GraphInfo<GraphNode, GraphEdge> {
-    throw new Error(
-      'getAccumulator(data?: GermiculeMeta): GraphInfo<GraphNode, GraphEdge> not implemented',
-    );
-  }
+  // getAccumulator(data?: GermiculeMeta): GraphInfo<GraphNode, GraphEdge> {
+  //   throw new Error(
+  //     'getAccumulator(data?: GermiculeMeta): GraphInfo<GraphNode, GraphEdge> not implemented',
+  //   );
+  // }
 
   toGraphInfo(data: GermiculeMeta): GraphInfo<GraphNode, GraphEdge> {
     const accumulator = this.getAccumulator(data);
@@ -294,33 +401,6 @@ export class GermiculeEChartTranslator extends GermiculeTranslator<
     }
     return result;
   }
-
-  getAccumulator(data?: GermiculeMeta): EChartGraphInfo {
-    const result: EChartGraphInfo = {
-      nodes: [],
-      edges: new Map<string, EChartGraphEdge>(),
-      partialEdges: [],
-      groups: new Map<string, GraphGroup>([
-        [this.defaultCategoryInfo.name, this.defaultCategoryInfo],
-      ]),
-    };
-    if (!data || data.connections.length === 0) {
-      result.nodes.push({
-        ...this.getDefaultNode(),
-        _tooltip: 'your germicule is empty',
-      } as EChartGraphNode);
-      return result;
-    }
-    if ('groups' in data) {
-      data.groups?.forEach((group: GermiculeGroup) => {
-        result.groups!.set(group.name, {
-          ...group,
-          id: this.getGroupId(group.name),
-        } as GraphGroup);
-      });
-    }
-    return result;
-  }
 }
 
 export class GermiculeD3Translator extends GermiculeTranslator<
@@ -352,33 +432,48 @@ export class GermiculeD3Translator extends GermiculeTranslator<
     node.group = groupIndex;
   }
 
+  entityIcons = new Map<string, string>([
+    ['default', '/graphIcons/default.png'],
+    ['firm', '/graphIcons/defaultFirm.png'],
+    ['Bond', '/graphIcons/defaultBond.png'],
+  ]);
+
   toNode(item: GermiculeItem): D3GraphNode {
     let partial: Partial<D3GraphNode> = {
       ...this.getDefaultNode(),
       // _tooltip: JSON.stringify(item),
     };
+    let result: D3GraphNode;
     if (item === null) {
-      return {
+      result = {
         ...partial,
         _label: `unknown ${this.getNextUnknown()}`,
       } as D3GraphNode;
-    }
-    item = item as GermiculeNode;
-    const result: D3GraphNode = {
-      ...partial,
-      id: item.name,
-      _label: item.name,
-    };
-    if (item.risk && this.isValidRisk(item.risk)) {
-      result.value = item.risk;
-      result._tooltip = String(item.risk);
-      // result.symbolSize = this.symbolSize * (1 + (5 - item.risk) / 5);
-      // result.itemStyle = {
-      //   color: this.theme.risks[Math.ceil(item.risk)],
-      // };
-    }
-    if (item.icon) {
-      result.icon = item.icon;
+    } else {
+      item = item as GermiculeNode;
+      result = {
+        ...partial,
+        id: item.name,
+        _label: item.name,
+      };
+      if (item.risk && this.isValidRisk(item.risk)) {
+        result.value = item.risk;
+        result._tooltip = String(item.risk);
+        // result.symbolSize = this.symbolSize * (1 + (5 - item.risk) / 5);
+        // result.itemStyle = {
+        //   color: this.theme.risks[Math.ceil(item.risk)],
+        // };
+      }
+      if (item.icon) {
+        result.icon = item.icon;
+      } else if (item.entityType) {
+        result.icon = this.entityIcons.get(item.entityType);
+      }
+      ['entityType'].forEach((key: string) => {
+        if (item && key in item) {
+          result[key] = item[key];
+        }
+      });
     }
     return result;
   }
@@ -397,39 +492,48 @@ export class GermiculeD3Translator extends GermiculeTranslator<
     return result;
   }
 
-  getAccumulator(data?: GermiculeMeta): D3GraphInfo {
-    const result: D3GraphInfo = {
-      nodes: [],
-      edges: new Map<string, D3GraphEdge>(),
-      partialEdges: [],
-      groups: new Map<string, GraphGroup>([
-        [this.defaultCategoryInfo.name, this.defaultCategoryInfo],
-      ]),
-    };
-    if (!data || data.connections.length === 0) {
-      result.nodes.push({
-        ...this.getDefaultNode(),
-        _tooltip: 'your germicule is empty',
-      } as D3GraphNode);
-      return result;
-    }
-    if ('groups' in data) {
-      data.groups?.forEach((group: GermiculeGroup) => {
-        result.groups!.set(group.name, {
-          ...group,
-          id: this.getGroupId(group.name),
-        } as GraphGroup);
-      });
-    }
-    return result;
-  }
-
   toGraphInfo(data: GermiculeMeta): GraphInfo<D3GraphNode, D3GraphEdge> {
     const accumulator = super.toGraphInfo(data);
-    accumulator.edges.forEach((edge: D3GraphEdge, key: string) => {
-      edge.source = this.getNodeId(edge.source);
-      edge.target = this.getNodeId(edge.target);
+    let nodeCount: number = 0;
+    const placeHolders: D3GraphNode[] = [];
+    accumulator.nodes.forEach((node: D3GraphNode, key: string) => {
+      if (this.isPlaceHolder(node)) {
+        placeHolders.push(node);
+      }
+      node.index = nodeCount++;
     });
+    const badEdges = new Map<string, string>();
+    accumulator.edges.forEach((edge: D3GraphEdge, key: string) => {
+      if (!accumulator.nodes.has(edge.source)) {
+        badEdges.set(
+          key,
+          `edge with source ${edge.source} is not defined in nodes`,
+        );
+        return;
+      }
+      edge.source = accumulator.nodes.get(edge.source as string)!.index;
+      if (!accumulator.nodes.has(edge.target)) {
+        badEdges.set(
+          key,
+          `edge with target ${edge.target} is not defined in nodes`,
+        );
+      }
+      edge.target = accumulator.nodes.get(edge.target as string)!.index;
+    });
+    const errors: string[] = [];
+    if (!_.isEmpty(placeHolders)) {
+      errors.push(
+        `links pointing to ${JSON.stringify(
+          placeHolders,
+        )} with no node definition`,
+      );
+    }
+    if (!_.isEmpty(badEdges)) {
+      errors.push(`bad edges: ${JSON.stringify(badEdges)}`);
+    }
+    if (!_.isEmpty(errors)) {
+      throw new Error(errors.join('\n'));
+    }
     return accumulator;
   }
 }

@@ -60,7 +60,7 @@ export class EChartGermiculeGraph extends React.Component<Props, State> {
           nodeScaleRatio: 0,
           roam: true,
           draggable: true,
-          nodes: this.state.graphInfo.nodes,
+          nodes: Array.from(this.state.graphInfo.nodes.values()),
           force: {
             edgeLength: 150,
             repulsion: 500,

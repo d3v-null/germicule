@@ -32,28 +32,36 @@ describe('GermiculeEChartTranslator.toGraphInfo', () => {
       COLORS,
     );
     const result = translator.toGraphInfo({ connections: emptyGermicule });
-    expect(result).toMatchObject(emptyEChartGraphInfo);
+    expect(Array.from(result.nodes.values())).toMatchObject(
+      Array.from(emptyEChartGraphInfo.nodes!.values()),
+    );
   });
   it('should handle unknown germicule data', () => {
     const translator: GermiculeEChartTranslator = new GermiculeEChartTranslator(
       COLORS,
     );
     const result = translator.toGraphInfo({ connections: unknownGermicule });
-    expect(result).toMatchObject(unknownEChartGraphInfo);
+    expect(Array.from(result.nodes.values())).toMatchObject(
+      Array.from(unknownEChartGraphInfo.nodes!.values()),
+    );
   });
   it('should handle lonely germicule data', () => {
     const translator: GermiculeEChartTranslator = new GermiculeEChartTranslator(
       COLORS,
     );
     const result = translator.toGraphInfo({ connections: lonelyGermicule });
-    expect(result).toMatchObject(lonelyEChartGraphInfo);
+    expect(Array.from(result.nodes.values())).toMatchObject(
+      Array.from(lonelyEChartGraphInfo.nodes!.values()),
+    );
   });
   it('should handle twin germicule data', () => {
     const translator: GermiculeEChartTranslator = new GermiculeEChartTranslator(
       COLORS,
     );
     const result = translator.toGraphInfo({ connections: twinGermicule });
-    expect(result.nodes).toMatchObject(twinEChartGraphInfo.nodes!);
+    expect(Array.from(result.nodes.values())).toMatchObject(
+      Array.from(twinEChartGraphInfo.nodes!.values()),
+    );
     expect(Array.from(result.edges.values())).toMatchObject(
       Array.from(twinEChartGraphInfo.edges!.values()),
     );
@@ -63,7 +71,9 @@ describe('GermiculeEChartTranslator.toGraphInfo', () => {
       COLORS,
     );
     const result = translator.toGraphInfo({ connections: linkGermicule });
-    expect(result.nodes).toMatchObject(linkEChartGraphInfo.nodes!);
+    expect(Array.from(result.nodes.values())).toMatchObject(
+      Array.from(linkEChartGraphInfo.nodes!.values()),
+    );
     expect(Array.from(result.edges.values())).toMatchObject(
       Array.from(linkEChartGraphInfo.edges!.values()),
     );
@@ -73,7 +83,9 @@ describe('GermiculeEChartTranslator.toGraphInfo', () => {
       COLORS,
     );
     const result = translator.toGraphInfo({ connections: groupGermicule });
-    expect(result.nodes).toMatchObject(groupEChartGraphInfo.nodes!);
+    expect(Array.from(result.nodes.values())).toMatchObject(
+      Array.from(groupEChartGraphInfo.nodes!.values()),
+    );
     expect(result.groups).toMatchObject(groupEChartGraphInfo.groups!);
     expect(Array.from(result.edges.values())).toMatchObject(
       Array.from(groupEChartGraphInfo.edges!.values()),

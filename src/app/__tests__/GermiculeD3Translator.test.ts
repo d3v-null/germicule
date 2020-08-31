@@ -30,17 +30,23 @@ describe('GermiculeD3Translator.toGraphInfo', () => {
   it('should handle empty germicule data', () => {
     const translator: GermiculeD3Translator = new GermiculeD3Translator(COLORS);
     const result = translator.toGraphInfo({ connections: emptyGermicule });
-    expect(result).toMatchObject(emptyD3GraphInfo);
+    expect(Array.from(result.nodes.values())).toMatchObject(
+      Array.from(emptyD3GraphInfo.nodes!.values()),
+    );
   });
   it('should handle unknown germicule data', () => {
     const translator: GermiculeD3Translator = new GermiculeD3Translator(COLORS);
     const result = translator.toGraphInfo({ connections: unknownGermicule });
-    expect(result).toMatchObject(unknownD3GraphInfo);
+    expect(Array.from(result.nodes.values())).toMatchObject(
+      Array.from(unknownD3GraphInfo.nodes!.values()),
+    );
   });
   it('should handle lonely germicule data', () => {
     const translator: GermiculeD3Translator = new GermiculeD3Translator(COLORS);
     const result = translator.toGraphInfo({ connections: lonelyGermicule });
-    expect(result).toMatchObject(lonelyD3GraphInfo);
+    expect(Array.from(result.nodes.values())).toMatchObject(
+      Array.from(lonelyD3GraphInfo.nodes!.values()),
+    );
   });
   // it('should handle twin germicule data', () => {
   //   const translator: GermiculeD3Translator = new GermiculeD3Translator(
