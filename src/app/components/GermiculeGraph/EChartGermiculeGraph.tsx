@@ -4,7 +4,7 @@ import { GermiculeMeta } from '../../../types/Germicule';
 import { GraphInfo } from '../../../types/EChartGraph';
 import {
   GermiculeEChartTranslator as GermiculeTranslator,
-  DEFAULT_THEME,
+  DEFAULT_THEME as THEME,
 } from 'app/GermiculeTranslator';
 
 interface Props {
@@ -39,7 +39,7 @@ export class EChartGermiculeGraph extends React.Component<Props, State> {
         formatter: params => params.data._tooltip,
         position: 'bottom',
       },
-      backgroundColor: DEFAULT_THEME.background,
+      backgroundColor: THEME.background,
       toolbox: { show: true },
       series: [
         {
@@ -51,6 +51,7 @@ export class EChartGermiculeGraph extends React.Component<Props, State> {
             show: true,
             position: 'inside',
             formatter: params => params.data._label,
+            color: THEME.foreground,
           },
           edgeLabel: {
             show: true,

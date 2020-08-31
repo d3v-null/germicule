@@ -32,8 +32,11 @@ import * as _ from 'lodash';
 
 export const defaultCategory = 'unknown';
 
+/* TODO(Dev): rename risks as palette */
 export const DEFAULT_THEME: GraphThemeDef = {
-  background: '#fdf6e3',
+  background: '#fdf6e3' /* base3 */,
+  foreground: '#586e75' /* base01 */,
+  backgroundHighlight: '#eee8d5' /* base2 */,
   risks: new Map<number, string>([
     [0, '#859900'] /* green */,
     [1, '#2aa198'] /* cyan */,

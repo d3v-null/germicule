@@ -38,5 +38,7 @@ export type GermiculeMeta = {
 
 export type GraphThemeDef = {
   background: string;
+  foreground: string;
+  backgroundHighlight: string;
   risks: Map<number, string>;
 };

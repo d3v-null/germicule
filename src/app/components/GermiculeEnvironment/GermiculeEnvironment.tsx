@@ -52,7 +52,8 @@ const DEFAULT_STATE = {
   splitterSize: 4,
   splitterPrimaryMin: SIZING.graphMinWidth,
   splitterSecondaryMin: SIZING.editorMinWidth,
-  graphBackend: 'D3',
+  // graphBackend: 'D3',
+  graphBackend: 'eCharts',
   graphSize: {
     width: 800,
     height: 400,
