@@ -32,19 +32,19 @@ import * as _ from 'lodash';
 
 export const defaultCategory = 'unknown';
 
-/* TODO(Dev): rename risks as palette */
+/* TODO(Dev): rename palette as palette */
 export const DEFAULT_THEME: GraphThemeDef = {
   background: '#fdf6e3' /* base3 */,
   foreground: '#586e75' /* base01 */,
   backgroundHighlight: '#eee8d5' /* base2 */,
-  risks: new Map<number, string>([
-    [0, '#859900'] /* green */,
-    [1, '#2aa198'] /* cyan */,
-    [2, '#268bd2'] /* blue */,
-    [3, '#6c71c4'] /* violet */,
-    [4, '#d33682'] /* magenta */,
-    [5, '#dc322f'] /* red */,
-  ]),
+  palette: [
+    '#859900' /* green */,
+    '#2aa198' /* cyan */,
+    '#268bd2' /* blue */,
+    '#6c71c4' /* violet */,
+    '#d33682' /* magenta */,
+    '#dc322f' /* red */,
+  ],
 }; /* base3 */
 
 export abstract class GermiculeTranslator<
@@ -120,8 +120,8 @@ export abstract class GermiculeTranslator<
     throw new Error('not implemented');
   }
 
-  isValidRisk(risk: number): boolean {
-    return Math.ceil(risk) < Array.from(this.theme.risks.keys()).length;
+  isValidEntityValue(entityValue: number): boolean {
+    return Math.ceil(entityValue) < this.theme.palette.length;
   }
 
   accumulateGroup(
@@ -155,7 +155,7 @@ export abstract class GermiculeTranslator<
         )}`,
       );
     }
-
+    // console.log(`accumulating node ${identifier}`, JSON.stringify(node));
     accumulator.nodes.set(identifier, node);
   }
 
@@ -198,8 +198,11 @@ export abstract class GermiculeTranslator<
       edges: new Map<string, GraphEdge>(),
       partialEdges: [],
       groups: new Map<string, GraphGroup>(),
+      meta: {},
     };
-    this.accumulateGroup(accumulator, this.defaultCategoryInfo as GraphGroup);
+    this.accumulateGroup(accumulator, {
+      ...this.defaultCategoryInfo,
+    } as GraphGroup);
     if (
       !data ||
       _.isEmpty(data) ||
@@ -298,11 +301,35 @@ export abstract class GermiculeTranslator<
   //   );
   // }
 
+  edgeMeta(accumulator: GraphInfo<GraphNode, GraphEdge>): void {
+    accumulator.edges.forEach((edge: GraphEdge) => {
+      if (edge.value) {
+        if (
+          !(
+            'edgeMin' in accumulator.meta &&
+            edge.value > accumulator.meta['edgeMin']
+          )
+        ) {
+          accumulator.meta['edgeMin'] = edge.value;
+        }
+        if (
+          !(
+            'edgeMax' in accumulator.meta &&
+            edge.value < accumulator.meta['edgeMax']
+          )
+        ) {
+          accumulator.meta['edgeMax'] = edge.value;
+        }
+      }
+    });
+  }
+
   toGraphInfo(data: GermiculeMeta): GraphInfo<GraphNode, GraphEdge> {
     const accumulator = this.getAccumulator(data);
     if (data && 'connections' in data) {
       this.buildGraph(data.connections, accumulator);
     }
+    this.edgeMeta(accumulator);
     // console.log('accumulator', accumulator);
     return accumulator;
   }
@@ -360,12 +387,12 @@ export class GermiculeEChartTranslator extends GermiculeTranslator<
       name: item.name,
       _label: item.name,
     };
-    if (item.risk && this.isValidRisk(item.risk)) {
-      result.value = item.risk;
-      result._tooltip = String(item.risk);
-      result.symbolSize = this.symbolSize * (1 + (5 - item.risk) / 5);
+    if (item.entityValue && this.isValidEntityValue(item.entityValue)) {
+      result.value = item.entityValue;
+      result._tooltip = String(item.entityValue);
+      result.symbolSize = this.symbolSize * (1 + (5 - item.entityValue) / 5);
       result.itemStyle = {
-        color: this.theme.risks.get(Math.ceil(item.risk)),
+        color: this.theme.palette[Math.ceil(item.entityValue)],
       };
     }
     return result;
@@ -392,17 +419,17 @@ export class GermiculeEChartTranslator extends GermiculeTranslator<
   };
 
   toPartialEdge(item: GermiculeItem, target: string): Partial<EChartGraphEdge> {
-    let result: Partial<EChartGraphEdge> = { ...this.defaultEdge, target };
-    if (item && 'description' in item) {
-      result._label = item.description;
-      result._tooltip = item.description;
+    let edge: Partial<EChartGraphEdge> = { ...this.defaultEdge, target };
+    if (item && 'connectionDescription' in item) {
+      edge._label = item.connectionDescription;
+      edge._tooltip = item.connectionDescription;
     } else {
-      result.label = { show: false };
+      edge.label = { show: false };
     }
-    if (item && 'contact' in item && item.contact !== null) {
-      result.value = item.contact;
+    if (item && 'connectionValue' in item && item.connectionValue !== null) {
+      edge.value = item.connectionValue;
     }
-    return result;
+    return edge;
   }
 }
 
@@ -411,7 +438,7 @@ export class GermiculeD3Translator extends GermiculeTranslator<
   D3GraphEdge
 > {
   constructor(theme?: GraphThemeDef, symbolSize?: number) {
-    super(theme);
+    super(theme ? theme : DEFAULT_THEME);
   }
 
   defaultCategoryInfo: GraphGroup = {
@@ -459,12 +486,12 @@ export class GermiculeD3Translator extends GermiculeTranslator<
         id: item.name,
         _label: item.name,
       };
-      if (item.risk && this.isValidRisk(item.risk)) {
-        result.value = item.risk;
-        result._tooltip = String(item.risk);
-        // result.symbolSize = this.symbolSize * (1 + (5 - item.risk) / 5);
+      if (item.entityValue && this.isValidEntityValue(item.entityValue)) {
+        result.value = item.entityValue;
+        result._tooltip = String(item.entityValue);
+        // result.symbolSize = this.symbolSize * (1 + (5 - item.entityValue) / 5);
         // result.itemStyle = {
-        //   color: this.theme.risks[Math.ceil(item.risk)],
+        //   color: this.theme.palette[Math.ceil(item.entityValue)],
         // };
       }
       if (item.icon) {
@@ -483,14 +510,14 @@ export class GermiculeD3Translator extends GermiculeTranslator<
 
   toPartialEdge(item: GermiculeItem, target: string): Partial<D3GraphEdge> {
     let result: Partial<D3GraphEdge> = { ...this.defaultEdge, target };
-    if (item && 'description' in item) {
-      result._label = item.description;
-      result._tooltip = item.description;
+    if (item && 'connectionDescription' in item) {
+      result._label = item.connectionDescription;
+      result._tooltip = item.connectionDescription;
     } else {
       // result.label = { show: false };
     }
-    if (item && 'contact' in item && item.contact !== null) {
-      result.value = item.contact;
+    if (item && 'connectionValue' in item && item.connectionValue !== null) {
+      result.value = item.connectionValue;
     }
     return result;
   }
@@ -507,21 +534,36 @@ export class GermiculeD3Translator extends GermiculeTranslator<
     });
     const badEdges = new Map<string, string>();
     accumulator.edges.forEach((edge: D3GraphEdge, key: string) => {
-      if (!accumulator.nodes.has(edge.source)) {
+      if (edge.source === edge.target) {
         badEdges.set(
           key,
-          `edge with source ${edge.source} is not defined in nodes`,
+          `edge source is same as target: ${edge.source} | ${JSON.stringify(
+            edge,
+          )}`,
         );
         return;
       }
-      edge.source = accumulator.nodes.get(edge.source as string)!.index;
+      if (!accumulator.nodes.has(edge.source)) {
+        badEdges.set(
+          key,
+          `edge with source ${
+            edge.source
+          } is not defined in nodes | ${JSON.stringify(edge)}`,
+        );
+        return;
+      }
+      edge.source = accumulator.nodes.get(edge.source as string)!
+        .index as number;
       if (!accumulator.nodes.has(edge.target)) {
         badEdges.set(
           key,
-          `edge with target ${edge.target} is not defined in nodes`,
+          `edge with target ${
+            edge.target
+          } is not defined in nodes | ${JSON.stringify(edge)}`,
         );
       }
-      edge.target = accumulator.nodes.get(edge.target as string)!.index;
+      edge.target = accumulator.nodes.get(edge.target as string)!
+        .index as number;
     });
     const errors: string[] = [];
     if (!_.isEmpty(placeHolders)) {
@@ -532,11 +574,14 @@ export class GermiculeD3Translator extends GermiculeTranslator<
       );
     }
     if (!_.isEmpty(badEdges)) {
-      errors.push(`bad edges: ${JSON.stringify(badEdges)}`);
+      errors.push(
+        `bad edges: ${JSON.stringify(Array.from(badEdges.entries()))}`,
+      );
     }
     if (!_.isEmpty(errors)) {
       throw new Error(errors.join('\n'));
     }
+    // console.log(accumulator);
     return accumulator;
   }
 }

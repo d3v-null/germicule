@@ -8,7 +8,6 @@ export interface GraphNode extends BaseGraphNode {
   id: string;
   _label?: string;
   _tooltip?: string;
-  value?: number;
   group?: number;
   index?: number;
   fx?: number | null;
@@ -21,7 +20,6 @@ export interface GraphNode extends BaseGraphNode {
 export interface GraphEdge extends BaseGraphEdge {
   _label?: string;
   _tooltip?: string;
-  value?: number;
 }
 
 export type GraphInfo = BaseGraphInfo<GraphNode, GraphEdge>;

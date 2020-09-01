@@ -1,7 +1,8 @@
 export type GermiculeLink = {
   link: string;
-  contact?: number;
-  description?: string;
+  connectionValue?: number;
+  connectionType?: string;
+  connectionDescription?: string;
 };
 
 export type ReservedGroupNames = '❓';
@@ -12,9 +13,11 @@ export type GermiculeNode = {
   name: string;
   entityType?: string;
   label?: string;
-  risk?: number;
-  contact?: number;
-  description?: string;
+  entityValue?: number;
+  entityDescription?: string;
+  connectionValue?: number;
+  connectionType?: string;
+  connectionDescription?: string;
   group?: GroupName;
   icon?: string;
   connections?: GermiculeItem[];
@@ -40,5 +43,5 @@ export type GraphThemeDef = {
   background: string;
   foreground: string;
   backgroundHighlight: string;
-  risks: Map<number, string>;
+  palette: string[];
 };

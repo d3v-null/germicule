@@ -2,11 +2,13 @@ export type GraphNode = {
   index?: number;
   placeholder?: boolean;
   entityType?: string;
+  value?: number;
 };
 
 export type GraphEdge = {
   source: any;
   target: any;
+  value?: number;
   _label?: string;
 };
 
@@ -22,5 +24,5 @@ export type GraphInfo<GraphNode, GraphEdge> = {
   edges: Map<string, GraphEdge>;
   partialEdges: Partial<GraphEdge[]>;
   groups: Map<string, GraphGroup>;
-  // meta: object;
+  meta: object;
 };

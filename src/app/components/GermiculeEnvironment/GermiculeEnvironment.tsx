@@ -38,27 +38,31 @@ const SIZING = {
   editorMinHeight: 300,
 };
 
-export const DEFAULT_SRC = {
-  version: '0.2',
-  groups: [{ name: 'group', members: [] } as GermiculeGroup],
-  connections: [{ name: '❓', group: 'group' }],
-} as GermiculeMeta;
+export function getDefaultSrc(): GermiculeMeta {
+  return {
+    version: '0.2',
+    groups: [{ name: 'group', members: [] } as GermiculeGroup],
+    connections: [{ name: '❓', group: 'group' }],
+  } as GermiculeMeta;
+}
 
 export function DEFAULT_ON_UPDATE_SRC(params: { src: object }): void {}
 
-const DEFAULT_STATE = {
-  src: DEFAULT_SRC,
-  splitterVertical: false,
-  splitterSize: 4,
-  splitterPrimaryMin: SIZING.graphMinWidth,
-  splitterSecondaryMin: SIZING.editorMinWidth,
-  // graphBackend: 'D3',
-  graphBackend: 'eCharts',
-  graphSize: {
-    width: 800,
-    height: 400,
-  },
-};
+export function getDefaultState() {
+  return {
+    src: { ...getDefaultSrc() },
+    splitterVertical: false,
+    splitterSize: 4,
+    splitterPrimaryMin: SIZING.graphMinWidth,
+    splitterSecondaryMin: SIZING.editorMinWidth,
+    // graphBackend: 'D3',
+    graphBackend: 'eCharts',
+    graphSize: {
+      width: 800,
+      height: 400,
+    },
+  };
+}
 
 export class GermiculeEnvironment extends React.Component<Props, State> {
   splitterLayout: React.RefObject<SplitterLayout>;
@@ -66,7 +70,7 @@ export class GermiculeEnvironment extends React.Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
-    this.state = { ...DEFAULT_STATE, ...props };
+    this.state = { ...getDefaultState(), ...props };
     this.onUpdateSrc = this.onUpdateSrc.bind(this);
     this.splitterLayout = React.createRef<SplitterLayout>();
     this.graph = React.createRef();

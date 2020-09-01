@@ -12,41 +12,39 @@ import {
   // linkD3GraphInfo,
   // groupD3GraphInfo,
 } from './germicule.data';
-import { GermiculeD3Translator } from '../GermiculeTranslator';
-
-const COLORS = {
-  background: '#fdf6e3',
-  risks: new Map<number, string>([
-    [0, '#859900'] /* green */,
-    [1, '#2aa198'] /* cyan */,
-    [2, '#268bd2'] /* blue */,
-    [3, '#6c71c4'] /* violet */,
-    [4, '#d33682'] /* magenta */,
-    [5, '#dc322f'] /* red */,
-  ]),
-};
+import {
+  GermiculeD3Translator,
+  DEFAULT_THEME as THEME,
+} from '../GermiculeTranslator';
+import { getDefaultSrc } from '../components/GermiculeEnvironment/GermiculeEnvironment';
+import * as _ from 'lodash';
 
 describe('GermiculeD3Translator.toGraphInfo', () => {
   it('should handle empty germicule data', () => {
-    const translator: GermiculeD3Translator = new GermiculeD3Translator(COLORS);
+    const translator: GermiculeD3Translator = new GermiculeD3Translator(THEME);
     const result = translator.toGraphInfo({ connections: emptyGermicule });
     expect(Array.from(result.nodes.values())).toMatchObject(
       Array.from(emptyD3GraphInfo.nodes!.values()),
     );
   });
   it('should handle unknown germicule data', () => {
-    const translator: GermiculeD3Translator = new GermiculeD3Translator(COLORS);
+    const translator: GermiculeD3Translator = new GermiculeD3Translator(THEME);
     const result = translator.toGraphInfo({ connections: unknownGermicule });
     expect(Array.from(result.nodes.values())).toMatchObject(
       Array.from(unknownD3GraphInfo.nodes!.values()),
     );
   });
   it('should handle lonely germicule data', () => {
-    const translator: GermiculeD3Translator = new GermiculeD3Translator(COLORS);
+    const translator: GermiculeD3Translator = new GermiculeD3Translator(THEME);
     const result = translator.toGraphInfo({ connections: lonelyGermicule });
     expect(Array.from(result.nodes.values())).toMatchObject(
       Array.from(lonelyD3GraphInfo.nodes!.values()),
     );
+  });
+  it('should handle default germicule data', () => {
+    const translator: GermiculeD3Translator = new GermiculeD3Translator(THEME);
+    const result = translator.toGraphInfo(getDefaultSrc());
+    expect(_.isEmpty(Array.from(result.edges.values()))).toBe(true);
   });
   // it('should handle twin germicule data', () => {
   //   const translator: GermiculeD3Translator = new GermiculeD3Translator(

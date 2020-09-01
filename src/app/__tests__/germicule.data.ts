@@ -32,7 +32,7 @@ export const unknownD3GraphInfo: Partial<D3GraphInfo> = {
 };
 
 export const lonelyGermicule: GermiculeItem[] = [
-  { name: '🦄', risk: 5 } as GermiculeItem,
+  { name: '🦄', entityValue: 5 } as GermiculeItem,
 ];
 export const lonelyEChartGraphInfo: Partial<EChartGraphInfo> = {
   nodes: new Map<string, EChartGraphNode>([
@@ -48,13 +48,13 @@ export const lonelyD3GraphInfo: Partial<D3GraphInfo> = {
 export const twinGermicule: GermiculeItem[] = [
   {
     name: '🌞',
-    risk: 3,
+    entityValue: 3,
     connections: [
       {
         name: '🌏',
-        risk: 2,
-        contact: 5,
-        description: 'planet',
+        entityValue: 2,
+        connectionValue: 5,
+        connectionDescription: 'planet',
       },
     ],
   },
@@ -82,15 +82,15 @@ export const linkGermicule: GermiculeItem[] = [
     connections: [
       {
         name: '🌏',
-        description: 'planet',
+        connectionDescription: 'planet',
         connections: [
           {
             name: '🌚',
-            description: 'sattelite',
+            connectionDescription: 'sattelite',
             connections: [
               {
                 link: '🌞',
-                description: 'best buds',
+                connectionDescription: 'best buds',
               },
             ],
           },
