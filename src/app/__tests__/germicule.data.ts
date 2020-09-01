@@ -36,12 +36,12 @@ export const lonelyGermicule: GermiculeItem[] = [
 ];
 export const lonelyEChartGraphInfo: Partial<EChartGraphInfo> = {
   nodes: new Map<string, EChartGraphNode>([
-    ['🦄', { name: '🦄', _label: '🦄', value: 5 }],
+    ['🦄', { name: '🦄', _label: '🦄', valueRaw: 5 }],
   ]),
 };
 export const lonelyD3GraphInfo: Partial<D3GraphInfo> = {
   nodes: new Map<string, D3GraphNode>([
-    ['🦄', { id: '🦄', group: 0, value: 5 }],
+    ['🦄', { id: '🦄', group: 0, valueRaw: 5 }],
   ]),
 };
 
@@ -61,19 +61,19 @@ export const twinGermicule: GermiculeItem[] = [
 ] as GermiculeItem[];
 export const twinEChartGraphInfo: Partial<EChartGraphInfo> = {
   nodes: new Map<string, EChartGraphNode>([
-    ['🌏', { name: '🌏', _label: '🌏', value: 2 }],
-    ['🌞', { name: '🌞', _label: '🌞', value: 3 }],
+    ['🌏', { name: '🌏', _label: '🌏', valueRaw: 2 }],
+    ['🌞', { name: '🌞', _label: '🌞', valueRaw: 3 }],
   ]),
   edges: new Map<string, EChartGraphEdge>([
-    ['🌞 > 🌏', { source: '🌞', target: '🌏', value: 5, _label: 'planet' }],
+    ['🌞 > 🌏', { source: '🌞', target: '🌏', valueRaw: 5, _label: 'planet' }],
   ]),
 };
 export const twinD3GraphInfo: Partial<D3GraphInfo> = {
   nodes: new Map<string, D3GraphNode>([
-    ['🌏', { id: '🌏', value: 2 }],
-    ['🌞', { id: '🌞', value: 3 }],
+    ['🌏', { id: '🌏', valueRaw: 2 }],
+    ['🌞', { id: '🌞', valueRaw: 3 }],
   ]),
-  links: [{ source: '🌞', target: '🌏', value: 5 }],
+  links: [{ source: '🌞', target: '🌏', valueRaw: 5 }],
 } as Partial<D3GraphInfo>;
 
 export const linkGermicule: GermiculeItem[] = [

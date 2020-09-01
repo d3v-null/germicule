@@ -47,6 +47,11 @@ export const DEFAULT_THEME: GraphThemeDef = {
   ],
 }; /* base3 */
 
+type Bounds = {
+  min?: number;
+  max?: number;
+};
+
 export abstract class GermiculeTranslator<
   GraphNode extends BaseGraphNode,
   GraphEdge extends BaseGraphEdge
@@ -301,25 +306,77 @@ export abstract class GermiculeTranslator<
   //   );
   // }
 
-  edgeMeta(accumulator: GraphInfo<GraphNode, GraphEdge>): void {
+  accumulateMeta(accumulator: GraphInfo<GraphNode, GraphEdge>): void {
+    accumulator.meta['edgeTypeBounds'] = new Map<string, Bounds>();
+    accumulator.meta['nodeTypeBounds'] = new Map<string, Bounds>();
     accumulator.edges.forEach((edge: GraphEdge) => {
-      if (edge.value) {
-        if (
-          !(
-            'edgeMin' in accumulator.meta &&
-            edge.value > accumulator.meta['edgeMin']
-          )
-        ) {
-          accumulator.meta['edgeMin'] = edge.value;
+      if (typeof edge.value !== 'undefined') {
+        const type = edge.connectionType ? edge.connectionType : 'default';
+        if (!accumulator.meta['edgeTypeBounds'].has(type)) {
+          accumulator.meta['edgeTypeBounds'].set(type, { min: 0, max: 1 });
         }
-        if (
-          !(
-            'edgeMax' in accumulator.meta &&
-            edge.value < accumulator.meta['edgeMax']
-          )
-        ) {
-          accumulator.meta['edgeMax'] = edge.value;
+        const edgeTypeBounds = accumulator.meta['edgeTypeBounds'].get(type);
+        if (edge.value < edgeTypeBounds.min) {
+          edgeTypeBounds.min = edge.value;
         }
+        if (edge.value > edgeTypeBounds.max) {
+          edgeTypeBounds.max = edge.value;
+        }
+      }
+    });
+    accumulator.nodes.forEach((node: GraphNode) => {
+      if (typeof node.value !== 'undefined') {
+        const type = node.entityType ? node.entityType : 'default';
+        if (!accumulator.meta['nodeTypeBounds'].has(type)) {
+          accumulator.meta['nodeTypeBounds'].set(type, { min: 0, max: 1 });
+        }
+        const nodeTypeBounds = accumulator.meta['nodeTypeBounds'].get(type);
+        if (node.value < nodeTypeBounds.min) {
+          nodeTypeBounds.min = node.value;
+        }
+        if (node.value > nodeTypeBounds.max) {
+          nodeTypeBounds.max = node.value;
+        }
+      }
+    });
+  }
+
+  linearMap = (value, x1, y1, x2, y2) =>
+    ((value - x1) * (y2 - x2)) / (y1 - x1) + x2;
+
+  normaliseValues(accumulator: GraphInfo<GraphNode, GraphEdge>): void {
+    accumulator.edges.forEach((edge: GraphEdge) => {
+      if (typeof edge.value !== 'undefined') {
+        edge.valueRaw = edge.value;
+        const type = edge.connectionType ? edge.connectionType : 'default';
+        if (!accumulator.meta['edgeTypeBounds'].has(type)) {
+          return;
+        }
+        const edgeTypeBounds = accumulator.meta['edgeTypeBounds'].get(type);
+        edge.value = this.linearMap(
+          edge.valueRaw,
+          edgeTypeBounds.min,
+          edgeTypeBounds.max,
+          0,
+          1,
+        );
+      }
+    });
+    accumulator.nodes.forEach((node: GraphNode) => {
+      if (typeof node.value !== 'undefined') {
+        node.valueRaw = node.value;
+        const type = node.entityType ? node.entityType : 'default';
+        if (!accumulator.meta['nodeTypeBounds'].has(type)) {
+          return;
+        }
+        const nodeTypeBounds = accumulator.meta['nodeTypeBounds'].get(type);
+        node.value = this.linearMap(
+          node.valueRaw,
+          nodeTypeBounds.min,
+          nodeTypeBounds.max,
+          0,
+          1,
+        );
       }
     });
   }
@@ -329,7 +386,8 @@ export abstract class GermiculeTranslator<
     if (data && 'connections' in data) {
       this.buildGraph(data.connections, accumulator);
     }
-    this.edgeMeta(accumulator);
+    this.accumulateMeta(accumulator);
+    this.normaliseValues(accumulator);
     // console.log('accumulator', accumulator);
     return accumulator;
   }
@@ -519,6 +577,11 @@ export class GermiculeD3Translator extends GermiculeTranslator<
     if (item && 'connectionValue' in item && item.connectionValue !== null) {
       result.value = item.connectionValue;
     }
+    ['connectionType'].forEach((key: string) => {
+      if (item && key in item) {
+        result[key] = item[key];
+      }
+    });
     return result;
   }
 

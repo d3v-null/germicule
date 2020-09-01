@@ -3,13 +3,16 @@ export type GraphNode = {
   placeholder?: boolean;
   entityType?: string;
   value?: number;
+  valueRaw?: number;
 };
 
 export type GraphEdge = {
   source: any;
   target: any;
   value?: number;
+  valueRaw?: number;
   _label?: string;
+  connectionType?: string;
 };
 
 export type GraphGroup = {

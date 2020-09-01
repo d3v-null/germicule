@@ -11,8 +11,8 @@ export type GroupName = Exclude<string, ReservedGroupNames>;
 
 export type GermiculeNode = {
   name: string;
-  entityType?: string;
   label?: string;
+  entityType?: string;
   entityValue?: number;
   entityDescription?: string;
   connectionValue?: number;

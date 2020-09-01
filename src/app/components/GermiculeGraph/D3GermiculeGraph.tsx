@@ -118,7 +118,11 @@ export class D3GermiculeGraph extends React.Component<Props, State> {
       .append('line')
       .style('stroke', '#999999')
       .style('stroke-opacity', 0.6)
-      .attr('stroke-width', (d: GraphEdge) => Math.sqrt(d.value!));
+      .attr(
+        'stroke-width',
+        (d: GraphEdge) =>
+          5 * (typeof d.value !== 'undefined' ? Math.sqrt(d.value!) : 1),
+      );
     // .style('stroke-width', (d: any) => Math.sqrt(d.value));
 
     this.simulation = d3
