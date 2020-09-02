@@ -13,6 +13,7 @@ export interface GraphNode extends BaseGraphNode {
   symbolSize?: number;
   category?: number;
   itemStyle?: object;
+  symbol?: string;
 }
 
 export interface GraphEdge extends BaseGraphEdge {

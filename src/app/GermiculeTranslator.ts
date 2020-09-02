@@ -52,6 +52,17 @@ type Bounds = {
   max?: number;
 };
 
+export const entityTypeIcons = new Map<string, string>([
+  ['default', '/graphIcons/question.svg'],
+  ['firm', '/graphIcons/landmark.svg'],
+  ['bond', '/graphIcons/money-check-alt.svg'],
+  ['company', '/graphIcons/building.svg'],
+  ['person', '/graphIcons/user-tie.svg'],
+  ['infrastructure', '/graphIcons/industry-alt.svg'],
+  ['taxHaven', '/graphIcons/island-tropical.svg'],
+  ['trust', '/graphIcons/hand-holding-usd-solid.svg'],
+]);
+
 export abstract class GermiculeTranslator<
   GraphNode extends BaseGraphNode,
   GraphEdge extends BaseGraphEdge
@@ -495,9 +506,16 @@ export class GermiculeD3Translator extends GermiculeTranslator<
   D3GraphNode,
   D3GraphEdge
 > {
-  constructor(theme?: GraphThemeDef, symbolSize?: number) {
+  constructor(theme?: GraphThemeDef) {
     super(theme ? theme : DEFAULT_THEME);
+    this.showPeople = true;
+    this.showBonds = true;
+    this.showFirms = true;
   }
+
+  showFirms: boolean;
+  showBonds: boolean;
+  showPeople: boolean;
 
   defaultCategoryInfo: GraphGroup = {
     name: defaultCategory,
@@ -520,12 +538,6 @@ export class GermiculeD3Translator extends GermiculeTranslator<
     node.group = groupIndex;
   }
 
-  entityIcons = new Map<string, string>([
-    ['default', '/graphIcons/default.png'],
-    ['firm', '/graphIcons/defaultFirm.png'],
-    ['Bond', '/graphIcons/defaultBond.png'],
-  ]);
-
   toNode(item: GermiculeItem): D3GraphNode {
     let partial: Partial<D3GraphNode> = {
       ...this.getDefaultNode(),
@@ -547,16 +559,13 @@ export class GermiculeD3Translator extends GermiculeTranslator<
       if (item.entityValue && this.isValidEntityValue(item.entityValue)) {
         result.value = item.entityValue;
         result._tooltip = String(item.entityValue);
-        // result.symbolSize = this.symbolSize * (1 + (5 - item.entityValue) / 5);
-        // result.itemStyle = {
-        //   color: this.theme.palette[Math.ceil(item.entityValue)],
-        // };
       }
-      if (item.icon) {
-        result.icon = item.icon;
-      } else if (item.entityType) {
-        result.icon = this.entityIcons.get(item.entityType);
-      }
+      // if (item.icon) {
+      //   result.icon = item.icon;
+      // } else
+      result.icon = entityTypeIcons.has(item.entityType!)
+        ? entityTypeIcons.get(item.entityType!)
+        : entityTypeIcons.get('default');
       ['entityType'].forEach((key: string) => {
         if (item && key in item) {
           result[key] = item[key];
@@ -585,18 +594,42 @@ export class GermiculeD3Translator extends GermiculeTranslator<
     return result;
   }
 
+  isNodeFiltered(node: D3GraphNode) {
+    return (
+      (!this.showPeople && node.entityType === 'person') ||
+      (!this.showBonds && node.entityType === 'bond') ||
+      (!this.showFirms && node.entityType === 'firm')
+    );
+  }
+
   toGraphInfo(data: GermiculeMeta): GraphInfo<D3GraphNode, D3GraphEdge> {
     const accumulator = super.toGraphInfo(data);
     let nodeCount: number = 0;
     const placeHolders: D3GraphNode[] = [];
+    const filteredNodes: string[] = [];
     accumulator.nodes.forEach((node: D3GraphNode, key: string) => {
       if (this.isPlaceHolder(node)) {
         placeHolders.push(node);
       }
+      if (this.isNodeFiltered(node)) {
+        filteredNodes.push(key);
+        return;
+      }
       node.index = nodeCount++;
     });
+    filteredNodes.forEach((key: string) => {
+      accumulator.nodes.delete(key);
+    });
+    const filteredEdges: string[] = [];
     const badEdges = new Map<string, string>();
     accumulator.edges.forEach((edge: D3GraphEdge, key: string) => {
+      if (
+        filteredNodes.indexOf(edge.source) > 0 ||
+        filteredNodes.indexOf(edge.target) > 0
+      ) {
+        filteredEdges.push(key);
+        return;
+      }
       if (edge.source === edge.target) {
         badEdges.set(
           key,
@@ -624,9 +657,16 @@ export class GermiculeD3Translator extends GermiculeTranslator<
             edge.target
           } is not defined in nodes | ${JSON.stringify(edge)}`,
         );
+        return;
       }
       edge.target = accumulator.nodes.get(edge.target as string)!
         .index as number;
+    });
+    filteredEdges.forEach((key: string) => {
+      accumulator.edges.delete(key);
+    });
+    Array.from(badEdges.keys()).forEach((key: string) => {
+      accumulator.edges.delete(key);
     });
     const errors: string[] = [];
     if (!_.isEmpty(placeHolders)) {
@@ -636,11 +676,11 @@ export class GermiculeD3Translator extends GermiculeTranslator<
         )} with no node definition`,
       );
     }
-    if (!_.isEmpty(badEdges)) {
-      errors.push(
-        `bad edges: ${JSON.stringify(Array.from(badEdges.entries()))}`,
-      );
-    }
+    // if (!_.isEmpty(badEdges)) {
+    //   errors.push(
+    //     `bad edges: ${JSON.stringify(Array.from(badEdges.entries()))}`,
+    //   );
+    // }
     if (!_.isEmpty(errors)) {
       throw new Error(errors.join('\n'));
     }

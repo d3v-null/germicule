@@ -1,8 +1,8 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { GermiculeEnvironment } from '../../components/GermiculeEnvironment';
-import defaultGermicule from '../../data/defaultGermicule.json.js';
-// import styled from 'styled-components/macro';
+import defaultGermicule from '../../data/defaultGermicule';
+
 
 export function HomePage() {
   return (
