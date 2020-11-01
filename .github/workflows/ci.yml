@@ -31,17 +31,17 @@ jobs:
       uses: codecov/codecov-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-    - name: Deploy to Google App Engine Staging
-      if: matrix.deploy && github.ref == 'refs/heads/staging'
-      uses: etereo-io/deploy-gae-action@v2.0.3
-      with:
-        service_account:  ${{ secrets.STAGING_SERVICE_ACCOUNT }}
-        project_id: ${{ secrets.STAGING_PROJECT_ID }}
-        gae_config_path: './app.yaml'
-    - name: Deploy to Google App Engine Production
-      if: matrix.deploy && github.ref == 'refs/heads/master'
-      uses: etereo-io/deploy-gae-action@v2.0.3
-      with:
-        service_account:  ${{ secrets.SERVICE_ACCOUNT }}
-        project_id: ${{ secrets.PROJECT_ID }}
-        gae_config_path: './app.yaml'
+    # - name: Deploy to Google App Engine Staging
+    #   if: matrix.deploy && github.ref == 'refs/heads/staging'
+    #   uses: etereo-io/deploy-gae-action@v2.0.3
+    #   with:
+    #     service_account:  ${{ secrets.STAGING_SERVICE_ACCOUNT }}
+    #     project_id: ${{ secrets.STAGING_PROJECT_ID }}
+    #     gae_config_path: './app.yaml'
+    # - name: Deploy to Google App Engine Production
+    #   if: matrix.deploy && github.ref == 'refs/heads/master'
+    #   uses: etereo-io/deploy-gae-action@v2.0.3
+    #   with:
+    #     service_account:  ${{ secrets.SERVICE_ACCOUNT }}
+    #     project_id: ${{ secrets.PROJECT_ID }}
+    #     gae_config_path: './app.yaml'
