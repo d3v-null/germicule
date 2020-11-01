@@ -15,6 +15,7 @@ export interface GraphNode extends BaseGraphNode {
   x?: number;
   y?: number;
   icon?: string;
+  clipIcon?: boolean;
 }
 
 export interface GraphEdge extends BaseGraphEdge {

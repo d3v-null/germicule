@@ -33,6 +33,7 @@ export class D3GermiculeGraph extends React.Component<Props, State> {
   translator: GermiculeTranslator;
   mountPoint: Element | null;
   svg;
+  node;
   circle;
   link;
   text;
@@ -41,6 +42,8 @@ export class D3GermiculeGraph extends React.Component<Props, State> {
   zoom;
   isDragging;
   nodeSize = 30;
+  showCircles = true;
+  highlightInfra = true;
   // simulation?: d3.Simulation<GraphNode, GraphEdge>;
 
   constructor(props: Props) {
@@ -53,6 +56,8 @@ export class D3GermiculeGraph extends React.Component<Props, State> {
     this.mountPoint = null;
     this.getData = this.getData.bind(this);
     this.getConfig = this.getConfig.bind(this);
+    this.onSizeChange = this.onSizeChange.bind(this);
+    this.onToggledElementsChange = this.onToggledElementsChange.bind(this);
   }
 
   getData() {
@@ -91,19 +96,23 @@ export class D3GermiculeGraph extends React.Component<Props, State> {
       .attr('x2', (d: any) => zoomTransform.x + zoomTransform.k * d.target.x)
       .attr('y2', (d: any) => zoomTransform.y + zoomTransform.k * d.target.y);
 
-    this.circle
-      .attr('cx', (d: any) => zoomTransform.x + zoomTransform.k * d.x)
-      .attr('cy', (d: any) => zoomTransform.y + zoomTransform.k * d.y);
-    this.text
-      .attr('x', (d: any) => zoomTransform.x + zoomTransform.k * d.x)
-      .attr('y', (d: any) => zoomTransform.y + zoomTransform.k * d.y);
-    this.imgs.attr(
-      'transform',
-      (d: any) =>
-        `translate(${
-          zoomTransform.x + zoomTransform.k * (d.x - this.nodeSize)
-        }, ${zoomTransform.y + zoomTransform.k * (d.y - this.nodeSize)})`,
-    );
+    if (this.showCircles) {
+      this.circle
+        .attr('cx', (d: any) => zoomTransform.x + zoomTransform.k * d.x)
+        .attr('cy', (d: any) => zoomTransform.y + zoomTransform.k * d.y);
+    }
+    if (this.text) {
+      this.text
+        .attr('x', (d: any) => zoomTransform.x + zoomTransform.k * d.x)
+        .attr('y', (d: any) => zoomTransform.y + zoomTransform.k * d.y);
+    }
+    if (this.imgs) {
+      this.imgs.attr('transform', (d: any) => {
+        const x = zoomTransform.x + zoomTransform.k * d.x - this.nodeSize;
+        const y = zoomTransform.y + zoomTransform.k * d.y - this.nodeSize;
+        return `translate(${x}, ${y})`;
+      });
+    }
   }
 
   componentDidMount() {
@@ -154,7 +163,7 @@ export class D3GermiculeGraph extends React.Component<Props, State> {
       d.fy = null;
     };
 
-    const node = this.svg
+    this.node = this.svg
       .selectAll('circle')
       .data(nodes)
       .enter()
@@ -168,12 +177,14 @@ export class D3GermiculeGraph extends React.Component<Props, State> {
           .on('end', dragEnded),
       );
 
-    this.circle = node
-      .append('circle')
-      .attr('r', this.nodeSize)
-      .style('stroke', '#FFFFFFFF')
-      .style('stroke-width', 1.5)
-      .style('fill', '#FFFFFFFF');
+    if (this.showCircles) {
+      this.circle = this.node
+        .append('circle')
+        .attr('r', this.nodeSize)
+        .style('stroke', '#FFFFFFFF')
+        .style('stroke-width', 1.5)
+        .style('fill', '#FFFFFFFF');
+    }
 
     /* This is the clip object for making icons circular */
     this.svg
@@ -196,28 +207,11 @@ export class D3GermiculeGraph extends React.Component<Props, State> {
       // this.svg.attr('transform', `scale(${transform.k})`);
     };
 
-    this.zoom = d3.zoom().scaleExtent([0.001, 0.9]).on('zoom', zoomed);
+    this.zoom = d3.zoom().scaleExtent([0.001, 1]).on('zoom', zoomed);
     this.svg.call(this.zoom);
 
-    this.text = node
-      .append('text')
-      .text(node => node.id)
-      .attr('font-size', this.nodeSize / 2)
-      .attr('dx', this.nodeSize + 5)
-      .attr('dy', 5);
-
-    this.imgs = node
-      .append('svg:image')
-      // .attr('class', 'icon')
-      .attr('xlink:href', (d: GraphNode) =>
-        d.icon ? d.icon : '/graphIcons/default.png',
-      )
-      .attr('width', this.nodeSize * 2)
-      .attr('height', this.nodeSize * 2)
-      .attr('clip-path', 'url(#clipObj)');
-
-    // .style('fill', (d: any) => color(d.group))
-    // .call(
+    this.onSizeChange();
+    this.onToggledElementsChange();
   }
 
   onSizeChange() {
@@ -233,11 +227,59 @@ export class D3GermiculeGraph extends React.Component<Props, State> {
     this.simulation.restart();
   }
 
+  onToggledElementsChange() {
+    const toggledElements = this.props.data.toggledElements
+      ? this.props.data.toggledElements
+      : [];
+
+    if (!toggledElements.includes('title')) {
+      this.text = this.node
+        .append('text')
+        .text(node => node.id)
+        .attr('font-size', this.nodeSize / 2)
+        .attr('dx', this.nodeSize + 5)
+        .attr('dy', 5);
+    } else if (this.text) {
+      this.text.remove();
+    }
+
+    if (!toggledElements.includes('icon')) {
+      this.imgs = this.node
+        .append('svg:image')
+        .attr('xlink:href', (d: GraphNode) =>
+          d.icon ? d.icon : 'graphIcons/defaultUnknown.png',
+        )
+        .attr('width', (d: GraphNode) =>
+          this.highlightInfra && d.entityType === 'infrastructure'
+            ? '200'
+            : this.nodeSize * 2,
+        )
+        .attr('height', (d: GraphNode) =>
+          this.highlightInfra && d.entityType === 'infrastructure'
+            ? '200'
+            : this.nodeSize * 2,
+        )
+        .attr('clip-path', (d: GraphNode) => {
+          return d.clipIcon ? 'url(#clipObj)' : '';
+        });
+    } else if (this.imgs) {
+      this.imgs.remove();
+    }
+
+    this.updatePositions();
+  }
+
   componentDidUpdate(prevProps: Props, prevState: State) {
     const {
       size,
-      // graphInfo: { nodes, edges },
+      data: { toggledElements },
     } = this.props;
+    if (
+      toggledElements &&
+      !_.isEqual(toggledElements, prevProps.data.toggledElements)
+    ) {
+      this.onToggledElementsChange();
+    }
     if (!_.isEqual(size, prevProps.size)) {
       this.onSizeChange();
     }
@@ -252,13 +294,11 @@ export class D3GermiculeGraph extends React.Component<Props, State> {
       height,
     };
     return (
-      <>
-        <div
-          id="germicule-graph-d3"
-          ref={mountPoint => (this.mountPoint = mountPoint)}
-          style={sytle}
-        />
-      </>
+      <div
+        id="germicule-graph-d3"
+        ref={mountPoint => (this.mountPoint = mountPoint)}
+        style={sytle}
+      />
     );
   }
 }

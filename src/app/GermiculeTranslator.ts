@@ -12,12 +12,12 @@ import {
   GraphThemeDef,
 } from '../types/Germicule';
 import {
-  GraphInfo as EChartGraphInfo,
+  // GraphInfo as EChartGraphInfo,
   GraphNode as EChartGraphNode,
   GraphEdge as EChartGraphEdge,
 } from '../types/EChartGraph';
 import {
-  GraphInfo as D3GraphInfo,
+  // GraphInfo as D3GraphInfo,
   GraphNode as D3GraphNode,
   GraphEdge as D3GraphEdge,
 } from '../types/D3Graph';
@@ -53,24 +53,30 @@ type Bounds = {
 };
 
 export const entityTypeIcons = new Map<string, string>([
-  ['default', '/graphIcons/question.svg'],
-  ['firm', '/graphIcons/landmark.svg'],
-  ['bond', '/graphIcons/money-check-alt.svg'],
-  ['company', '/graphIcons/building.svg'],
-  ['person', '/graphIcons/user-tie.svg'],
-  ['infrastructure', '/graphIcons/industry-alt.svg'],
-  ['taxHaven', '/graphIcons/island-tropical.svg'],
-  ['trust', '/graphIcons/hand-holding-usd-solid.svg'],
+  ['default', 'graphIcons/question.svg'],
+  ['firm', 'graphIcons/landmark.svg'],
+  ['bond', 'graphIcons/money-check-alt.svg'],
+  ['company', 'graphIcons/building.svg'],
+  ['person', 'graphIcons/user-tie.svg'],
+  ['infrastructure', 'graphIcons/industry-alt.svg'],
+  ['taxHaven', 'graphIcons/island-tropical.svg'],
+  ['trust', 'graphIcons/hand-holding-usd-solid.svg'],
 ]);
 
 export abstract class GermiculeTranslator<
   GraphNode extends BaseGraphNode,
   GraphEdge extends BaseGraphEdge
 > {
-  theme: GraphThemeDef = DEFAULT_THEME;
+  theme: GraphThemeDef;
+  showFirms: boolean;
+  showBonds: boolean;
+  showPeople: boolean;
 
   constructor(theme?: GraphThemeDef) {
-    if (theme) this.theme = theme;
+    this.theme = theme ? theme : DEFAULT_THEME;
+    this.showPeople = true;
+    this.showBonds = true;
+    this.showFirms = true;
   }
 
   unknownLabel: string = '❓';
@@ -101,28 +107,21 @@ export abstract class GermiculeTranslator<
     return this.nodesSeen.get(name)!;
   }
 
-  getDefaultNode(): Partial<GraphNode> {
-    throw new Error(`getDefaultNode(): Partial<GraphNode> not implemented`);
-  }
+  abstract getDefaultNode(): Partial<GraphNode>;
 
   defaultEdge: Partial<GraphEdge> = {};
   defaultGroupEdge: Partial<GraphEdge> = {};
 
   defaultCategoryInfo: Partial<GraphGroup> = {};
 
-  toNode(item: GermiculeItem): GraphNode {
-    throw new Error('toNode(item: GermiculeItem): GraphNode not implemented');
-  }
+  abstract toNode(item: GermiculeItem): GraphNode;
 
-  toPartialEdge(item: GermiculeItem, target: string): Partial<GraphEdge> {
-    throw new Error(
-      'toPartialEdge(item: GermiculeItem, target: string): Partial<GraphEdge> not implemented',
-    );
-  }
+  abstract toPartialEdge(
+    item: GermiculeItem,
+    target: string,
+  ): Partial<GraphEdge>;
 
-  getNodeIdentifier(node: GraphNode): string {
-    throw new Error('not implemented');
-  }
+  abstract getNodeIdentifier(node: GraphNode): string;
 
   getEdgeIdentifier(source: any, target: any): string {
     return `${source} > ${target}`;
@@ -132,12 +131,20 @@ export abstract class GermiculeTranslator<
     return node.placeholder === true;
   }
 
-  setNodeGroupIndex(node: GraphNode, groupIndex: number): void {
-    throw new Error('not implemented');
+  abstract setNodeGroupIndex(node: GraphNode, groupIndex: number): void;
+
+  abstract setNodeIcon(node: GraphNode, icon: string): void;
+
+  isThemableEntityValue(entityValue: number): boolean {
+    return Math.ceil(entityValue) < this.theme.palette.length;
   }
 
-  isValidEntityValue(entityValue: number): boolean {
-    return Math.ceil(entityValue) < this.theme.palette.length;
+  isNodeFiltered(node: D3GraphNode) {
+    return (
+      (!this.showPeople && node.entityType === 'person') ||
+      (!this.showBonds && node.entityType === 'bond') ||
+      (!this.showFirms && node.entityType === 'firm')
+    );
   }
 
   accumulateGroup(
@@ -165,14 +172,15 @@ export abstract class GermiculeTranslator<
       accumulator.nodes.has(identifier) &&
       !this.isPlaceHolder(accumulator.nodes.get(identifier)!)
     ) {
-      throw new Error(
+      console.warn(
         `node with identifier ${identifier} defined twice: ${JSON.stringify(
           node,
         )}`,
       );
+    } else {
+      accumulator.nodes.set(identifier, node);
     }
     // console.log(`accumulating node ${identifier}`, JSON.stringify(node));
-    accumulator.nodes.set(identifier, node);
   }
 
   accumulatePlaceHolderNode(
@@ -311,12 +319,6 @@ export abstract class GermiculeTranslator<
     accumulator.partialEdges.push(...parentPartialEdges);
   }
 
-  // getAccumulator(data?: GermiculeMeta): GraphInfo<GraphNode, GraphEdge> {
-  //   throw new Error(
-  //     'getAccumulator(data?: GermiculeMeta): GraphInfo<GraphNode, GraphEdge> not implemented',
-  //   );
-  // }
-
   accumulateMeta(accumulator: GraphInfo<GraphNode, GraphEdge>): void {
     accumulator.meta['edgeTypeBounds'] = new Map<string, Bounds>();
     accumulator.meta['nodeTypeBounds'] = new Map<string, Bounds>();
@@ -427,6 +429,10 @@ export class GermiculeEChartTranslator extends GermiculeTranslator<
     node.category = groupIndex;
   }
 
+  setNodeIcon(node: EChartGraphNode, iconHref: string): void {
+    node.symbol = `image://${iconHref}`;
+  }
+
   getDefaultNode(): Partial<EChartGraphNode> {
     return {
       name: this.unknownLabel,
@@ -456,7 +462,7 @@ export class GermiculeEChartTranslator extends GermiculeTranslator<
       name: item.name,
       _label: item.name,
     };
-    if (item.entityValue && this.isValidEntityValue(item.entityValue)) {
+    if (item.entityValue && this.isThemableEntityValue(item.entityValue)) {
       result.value = item.entityValue;
       result._tooltip = String(item.entityValue);
       result.symbolSize = this.symbolSize * (1 + (5 - item.entityValue) / 5);
@@ -464,6 +470,18 @@ export class GermiculeEChartTranslator extends GermiculeTranslator<
         color: this.theme.palette[Math.ceil(item.entityValue)],
       };
     }
+    // this.setNodeIcon(
+    //   result,
+    //   item.icon
+    //     ? item.icon!
+    //     : entityTypeIcons.has(item.entityType!)
+    //     ? entityTypeIcons.get(item.entityType!)!
+    //     : entityTypeIcons.get('default')!,
+    // );
+    if (item.icon) {
+      this.setNodeIcon(result, item.icon);
+    }
+
     return result;
   }
 
@@ -508,14 +526,7 @@ export class GermiculeD3Translator extends GermiculeTranslator<
 > {
   constructor(theme?: GraphThemeDef) {
     super(theme ? theme : DEFAULT_THEME);
-    this.showPeople = true;
-    this.showBonds = true;
-    this.showFirms = true;
   }
-
-  showFirms: boolean;
-  showBonds: boolean;
-  showPeople: boolean;
 
   defaultCategoryInfo: GraphGroup = {
     name: defaultCategory,
@@ -538,6 +549,10 @@ export class GermiculeD3Translator extends GermiculeTranslator<
     node.group = groupIndex;
   }
 
+  setNodeIcon(node: D3GraphNode, iconHref: string): void {
+    node.icon = iconHref;
+  }
+
   toNode(item: GermiculeItem): D3GraphNode {
     let partial: Partial<D3GraphNode> = {
       ...this.getDefaultNode(),
@@ -556,16 +571,21 @@ export class GermiculeD3Translator extends GermiculeTranslator<
         id: item.name,
         _label: item.name,
       };
-      if (item.entityValue && this.isValidEntityValue(item.entityValue)) {
+      if (item.entityValue && this.isThemableEntityValue(item.entityValue)) {
         result.value = item.entityValue;
         result._tooltip = String(item.entityValue);
       }
-      // if (item.icon) {
-      //   result.icon = item.icon;
-      // } else
-      result.icon = entityTypeIcons.has(item.entityType!)
-        ? entityTypeIcons.get(item.entityType!)
-        : entityTypeIcons.get('default');
+      if (item.icon) {
+        this.setNodeIcon(result, item.icon);
+        result.clipIcon = true;
+      } else {
+        this.setNodeIcon(
+          result,
+          entityTypeIcons.has(item.entityType!)
+            ? entityTypeIcons.get(item.entityType!)!
+            : entityTypeIcons.get('default')!,
+        );
+      }
       ['entityType'].forEach((key: string) => {
         if (item && key in item) {
           result[key] = item[key];
@@ -592,14 +612,6 @@ export class GermiculeD3Translator extends GermiculeTranslator<
       }
     });
     return result;
-  }
-
-  isNodeFiltered(node: D3GraphNode) {
-    return (
-      (!this.showPeople && node.entityType === 'person') ||
-      (!this.showBonds && node.entityType === 'bond') ||
-      (!this.showFirms && node.entityType === 'firm')
-    );
   }
 
   toGraphInfo(data: GermiculeMeta): GraphInfo<D3GraphNode, D3GraphEdge> {

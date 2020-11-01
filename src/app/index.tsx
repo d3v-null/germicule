@@ -13,7 +13,9 @@ import { Switch, Route, BrowserRouter } from 'react-router-dom';
 import { GlobalStyle } from 'styles/global-styles';
 
 import { HomePage } from './containers/HomePage/Loadable';
-import { NotFoundPage } from './components/NotFoundPage/Loadable';
+// import { NotFoundPage } from './components/NotFoundPage/Loadable';
+
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 export function App() {
   return (
@@ -26,8 +28,8 @@ export function App() {
       </Helmet>
 
       <Switch>
-        <Route exact path="/" component={HomePage} />
-        <Route component={NotFoundPage} />
+        <Route component={HomePage} />
+        {/* <Route component={NotFoundPage} /> */}
       </Switch>
       <GlobalStyle />
     </BrowserRouter>

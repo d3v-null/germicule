@@ -5,11 +5,16 @@ exports[`<D3GermiculeGraph  /> should match snapshot 1`] = `
   id="germicule-graph-d3"
   style="width: 100px; height: 100px;"
 >
-  <svg>
+  <svg
+    height="200"
+    width="200"
+  >
     <g
       class="node"
     >
       <circle
+        cx="0"
+        cy="0"
         r="30"
         style="stroke: #FFFFFFFF; stroke-width: 1.5; fill: #FFFFFFFF;"
       />
@@ -17,13 +22,16 @@ exports[`<D3GermiculeGraph  /> should match snapshot 1`] = `
         dx="35"
         dy="5"
         font-size="15"
+        x="0"
+        y="0"
       >
         🦄
       </text>
       <image
-        clip-path="url(#clipObj)"
+        clip-path=""
         height="60"
-        href="/graphIcons/default.png"
+        href="graphIcons/question.svg"
+        transform="translate(-30, -30)"
         width="60"
       />
     </g>

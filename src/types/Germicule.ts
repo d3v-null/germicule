@@ -25,6 +25,9 @@ export type GermiculeNode = {
 
 export type GermiculeItem = GermiculeNode | GermiculeLink | null;
 
+export type ToggledElement = 'title' | 'icon';
+export type ToggledElements = ToggledElement[];
+
 export type GermiculeGroup = {
   name: GroupName;
   type?: string;
@@ -37,6 +40,7 @@ export type GermiculeMeta = {
   nodes?: GermiculeNode[];
   groups?: GermiculeGroup[];
   connections: GermiculeItem[];
+  toggledElements?: ToggledElements;
 };
 
 export type GraphThemeDef = {

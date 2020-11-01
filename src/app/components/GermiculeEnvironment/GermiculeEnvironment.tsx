@@ -5,7 +5,7 @@
  * Displays an interactive editor and graph side-by-side
  *
  */
-import React from 'react';
+import React, { Component } from 'react';
 import { GermiculeEditor } from '../GermiculeEditor';
 import { GermiculeMeta, GermiculeGroup } from '../../../types/Germicule';
 import SplitterLayout from 'react-splitter-layout';
@@ -13,21 +13,22 @@ import 'react-splitter-layout/lib/index.css';
 
 import { EChartGermiculeGraph } from '../GermiculeGraph/EChartGermiculeGraph';
 import { D3GermiculeGraph } from '../GermiculeGraph/D3GermiculeGraph';
+import { GermiculeSettings, Settings } from '../GermiculeSettings';
 import { BoxSize } from 'types';
 import * as _ from 'lodash';
 
 interface Props {
-  src?: object;
+  src?: GermiculeMeta;
   graphBackend?: string;
 }
 
 interface State {
-  src: object;
+  src: GermiculeMeta;
   splitterVertical: boolean;
   splitterPrimaryMin: number;
   splitterSecondaryMin: number;
   splitterSize: number;
-  graphBackend?: string;
+  graphBackend: string;
   graphSize: BoxSize;
 }
 
@@ -43,6 +44,7 @@ export function getDefaultSrc(): GermiculeMeta {
     version: '0.2',
     groups: [{ name: 'group', members: [] } as GermiculeGroup],
     connections: [{ name: '❓', group: 'group' }],
+    toggledElements: ['title', 'icon'],
   } as GermiculeMeta;
 }
 
@@ -64,7 +66,7 @@ export function getDefaultState() {
   };
 }
 
-export class GermiculeEnvironment extends React.Component<Props, State> {
+export class GermiculeEnvironment extends Component<Props, State> {
   splitterLayout: React.RefObject<SplitterLayout>;
   graph: React.RefObject<any>;
 
@@ -72,14 +74,36 @@ export class GermiculeEnvironment extends React.Component<Props, State> {
     super(props);
     this.state = { ...getDefaultState(), ...props };
     this.onUpdateSrc = this.onUpdateSrc.bind(this);
+    this.onUpdateSettings = this.onUpdateSettings.bind(this);
     this.splitterLayout = React.createRef<SplitterLayout>();
     this.graph = React.createRef();
     this.onUpdateDimensions = this.onUpdateDimensions.bind(this);
     this.getComponents = this.getComponents.bind(this);
   }
 
-  onUpdateSrc(params: { src: object }) {
-    this.setState({ src: params.src });
+  onUpdateSrc({ src }) {
+    this.setState({ src });
+  }
+
+  onUpdateSettings(settings: Partial<Settings>) {
+    // console.log('GermiculeEnvironment.onUpdateSettings settings: ', settings);
+    const newState = {};
+    const newSettings = _.pickBy(settings, (_, key) => {
+      return ['graphBackend'].includes(key);
+    });
+    if (newSettings) {
+      Object.assign(newState, newSettings);
+    }
+    const newSrc = _.pickBy(settings, (_, key) => {
+      return ['toggledElements'].includes(key);
+    });
+    if (newSrc) {
+      newState['src'] = { ...this.state.src, ...newSrc };
+    }
+    if (newState) {
+      console.log('GermiculeEnvironment.onUpdateSettings newSate:', newState);
+      this.setState(newState);
+    }
   }
 
   onUpdateDimensions() {
@@ -88,7 +112,6 @@ export class GermiculeEnvironment extends React.Component<Props, State> {
       const splitterLayoutDimensions = splitterLayout.container.getBoundingClientRect();
       const splitterDividerDimensions = splitterLayout.splitter.getBoundingClientRect();
       const splitterChildren = splitterLayout.container.children;
-      // console.log('splitterLayout', splitterLayout);
 
       const layoutWidth = splitterLayoutDimensions.width;
       const layoutHeight = splitterLayoutDimensions.height;
@@ -123,18 +146,18 @@ export class GermiculeEnvironment extends React.Component<Props, State> {
         if (splitterChildren) graphContainer = splitterChildren[0];
       }
 
-      // console.log('graphContainer', graphContainer);
-
       if (graphContainer) {
         const graphDimensions = graphContainer.getBoundingClientRect();
         newState.graphSize = {
           width: graphDimensions.width,
           height: graphDimensions.height,
         };
-        // console.log('graphSize', newState.graphSize);
+
+        if (Object.keys(graphContainer).includes('onSizeChange')) {
+          graphContainer.onSizeChange();
+        }
       }
       if (!_.isEmpty(newState)) {
-        // console.log('newSate', newState);
         this.setState(newState as State);
       }
     }
@@ -149,21 +172,45 @@ export class GermiculeEnvironment extends React.Component<Props, State> {
     window.removeEventListener('resize', this.onUpdateDimensions);
   }
 
+  getGraph() {
+    switch (this.state.graphBackend) {
+      case 'eCharts':
+        return (
+          <EChartGermiculeGraph
+            ref={this.graph}
+            data={this.state.src as GermiculeMeta}
+          />
+        );
+      case 'D3':
+      default:
+        return (
+          <D3GermiculeGraph
+            ref={this.graph}
+            data={this.state.src as GermiculeMeta}
+            size={this.state.graphSize}
+          />
+        );
+    }
+  }
+
   getComponents() {
+    const toggledElements = this.state.src.toggledElements
+      ? this.state.src.toggledElements
+      : [];
     const components = [
       <GermiculeEditor src={this.state.src} onUpdateSrc={this.onUpdateSrc} />,
-      this.state.graphBackend === 'eCharts' ? (
-        <EChartGermiculeGraph
-          ref={this.graph}
-          data={this.state.src as GermiculeMeta}
+      <>
+        <GermiculeSettings
+          onUpdateSettings={this.onUpdateSettings}
+          settings={
+            {
+              graphBackend: this.state.graphBackend,
+              toggledElements,
+            } as Settings
+          }
         />
-      ) : (
-        <D3GermiculeGraph
-          ref={this.graph}
-          data={this.state.src as GermiculeMeta}
-          size={this.state.graphSize}
-        />
-      ),
+        {this.getGraph()}
+      </>,
     ];
     return this.state.splitterVertical ? components.reverse() : components;
   }
